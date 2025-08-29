@@ -87,22 +87,62 @@ class GameScene(BaseScene):
         self.restock_timer = 0
     
     def spawn_customer(self):
-        """Spawn a new customer."""
+        """Spawn a new customer with minimum distance checking."""
         if self.customers_in_wave >= self.wave_size:
             return
         
         screen_width = self.game.screen.get_width()
         screen_height = self.game.screen.get_height()
         
-        # Random edge spawn
-        spawn_locations = [
-            (-30, random.randint(100, screen_height - 100)),
-            (screen_width + 30, random.randint(100, screen_height - 100)),
-            (random.randint(100, screen_width - 100), -30),
-            (random.randint(100, screen_width - 100), screen_height + 30)
-        ]
+        # Get configuration values
+        min_distance = config.get("game.min_customer_spawn_distance", 90)
+        retry_attempts = config.get("game.spawn_retry_attempts", 10)
         
-        spawn_x, spawn_y = random.choice(spawn_locations)
+        # Generate potential spawn locations
+        def get_random_spawn_location():
+            edge = random.randint(0, 3)
+            if edge == 0:  # Left edge
+                return (-30, random.randint(100, screen_height - 100))
+            elif edge == 1:  # Right edge
+                return (screen_width + 30, random.randint(100, screen_height - 100))
+            elif edge == 2:  # Top edge
+                return (random.randint(100, screen_width - 100), -30)
+            else:  # Bottom edge
+                return (random.randint(100, screen_width - 100), screen_height + 30)
+        
+        # Try to find a spawn location with adequate spacing
+        best_location = None
+        best_min_distance = 0
+        
+        for _ in range(retry_attempts):
+            spawn_x, spawn_y = get_random_spawn_location()
+            
+            # Check distance to all existing customers
+            if len(self.customers) == 0:
+                # No customers yet, any location is fine
+                best_location = (spawn_x, spawn_y)
+                break
+            
+            min_dist_to_customers = float('inf')
+            for customer in self.customers:
+                dist = ((spawn_x - customer.x) ** 2 + (spawn_y - customer.y) ** 2) ** 0.5
+                min_dist_to_customers = min(min_dist_to_customers, dist)
+            
+            # If this location meets minimum distance requirement, use it
+            if min_dist_to_customers >= min_distance:
+                best_location = (spawn_x, spawn_y)
+                break
+            
+            # Otherwise, track the best location found so far
+            if min_dist_to_customers > best_min_distance:
+                best_min_distance = min_dist_to_customers
+                best_location = (spawn_x, spawn_y)
+        
+        # Use the best location found
+        if best_location is None:
+            best_location = get_random_spawn_location()
+        
+        spawn_x, spawn_y = best_location
         drink_type = random.choice(list(DrinkType))
         
         # Calculate speed
@@ -142,6 +182,41 @@ class GameScene(BaseScene):
             self.is_restocking = True
             self.restock_timer = config.get("game.restock_duration", 180)
             game_logger.info("Started restocking")
+    
+    def jump_to_wave(self, wave_number: int):
+        """Jump directly to a specific wave number (debug feature).
+        
+        Args:
+            wave_number: The wave number to jump to
+        """
+        game_logger.info(f"Debug: Jumping to wave {wave_number}")
+        
+        # Clear existing customers
+        self.customers.empty()
+        
+        # Set the wave number
+        self.wave = wave_number
+        
+        # Reset wave-related variables
+        self.customers_in_wave = 0
+        initial_wave_size = config.get("game.initial_wave_size", 8)
+        max_wave_size = config.get("game.max_wave_size", 20)
+        self.wave_size = min(initial_wave_size + (self.wave - 1) * 2, max_wave_size)
+        
+        # Give bonus score for jumped waves (optional, for testing progression)
+        base_points = config.get("game.base_points", 10)
+        points_per_wave = config.get("game.points_per_wave", 2)
+        estimated_customers_per_wave = initial_wave_size
+        for w in range(1, wave_number):
+            wave_points = (base_points + (w - 1) * points_per_wave) * estimated_customers_per_wave
+            self.score += wave_points // 2  # Give half points for skipped waves
+        
+        # Refresh inventory
+        restock_amount = config.get("game.restock_amount", 5)
+        for drink_type in DrinkType:
+            self.inventory[drink_type] = restock_amount
+        
+        game_logger.info(f"Wave {self.wave} started! Size: {self.wave_size}")
     
     def check_collisions(self):
         """Check projectile-customer collisions."""
@@ -213,6 +288,30 @@ class GameScene(BaseScene):
                     self.paused = not self.paused
                 elif event.key == pygame.K_ESCAPE:
                     self.switch_to("main_menu")
+                # Debug wave jump controls - using number keys with SHIFT
+                elif event.key == pygame.K_PAGEUP:
+                    # Next wave
+                    self.jump_to_wave(self.wave + 1)
+                elif event.key == pygame.K_PAGEDOWN:
+                    # Previous wave
+                    if self.wave > 1:
+                        self.jump_to_wave(self.wave - 1)
+                # Number keys with SHIFT for specific waves
+                elif pygame.key.get_mods() & pygame.KMOD_SHIFT:
+                    if event.key == pygame.K_4:
+                        self.jump_to_wave(5)
+                    elif event.key == pygame.K_5:
+                        self.jump_to_wave(10)
+                    elif event.key == pygame.K_6:
+                        self.jump_to_wave(15)
+                    elif event.key == pygame.K_7:
+                        self.jump_to_wave(20)
+                    elif event.key == pygame.K_8:
+                        self.jump_to_wave(25)
+                    elif event.key == pygame.K_9:
+                        self.jump_to_wave(30)
+                    elif event.key == pygame.K_0:
+                        self.jump_to_wave(40)
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 if not self.paused:
                     mouse_pos = pygame.mouse.get_pos()
@@ -364,6 +463,13 @@ class GameScene(BaseScene):
             
             # Draw wave transition if needed
             self.game.hud.draw_wave_transition(screen)
+            
+            # Draw debug controls help text
+            if config.get("debug.show_wave_controls", True):
+                small_font = self.game.assets.get_font('small')
+                debug_text = "Debug: PageUp/PageDown (change wave), Shift+4-9,0 (jump to waves 5-40)"
+                text_surface = small_font.render(debug_text, True, (150, 150, 150))
+                screen.blit(text_surface, (10, screen.get_height() - 25))
         else:
             # Fallback to basic UI
             font = self.game.assets.get_font('normal')

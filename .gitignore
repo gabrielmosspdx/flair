@@ -51,3 +51,4 @@ coverage.xml
 .python-version
 
 logs
+saves/*.json

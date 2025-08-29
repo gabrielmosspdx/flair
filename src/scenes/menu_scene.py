@@ -99,10 +99,10 @@ class MainMenuScene(BaseScene):
         screen.blit(title, title_rect)
         
         # Draw version
-        small_font = self.game.assets.get_font('small')
-        version = small_font.render("Enhanced Edition", True, COLORS['text_gray'])
-        version_rect = version.get_rect(center=(screen.get_width()//2, 150))
-        screen.blit(version, version_rect)
+        # small_font = self.game.assets.get_font('small')
+        # version = small_font.render("Enhanced Edition", True, COLORS['text_gray'])
+        # version_rect = version.get_rect(center=(screen.get_width()//2, 150))
+        # screen.blit(version, version_rect)
         
         # Draw buttons
         for button in self.buttons:
