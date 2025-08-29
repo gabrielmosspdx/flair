@@ -367,7 +367,7 @@ class FlairGame:
         
         self.positive_dialogue = [
             "That's sick!",
-            "So voodoo!",
+            "Yum yum in my tum tum!",
             "Righteous!",
             "Perfect!",
             "Organic vibes!",
@@ -511,9 +511,9 @@ class FlairGame:
         self.selected_drink = DrinkType.BEER
         
         self.inventory = {
-            DrinkType.BEER: 20,
-            DrinkType.WINE: 20,
-            DrinkType.COCKTAIL: 20
+            DrinkType.BEER: 5,
+            DrinkType.WINE: 5,
+            DrinkType.COCKTAIL: 5
         }
         
         self.customers = []
@@ -995,9 +995,9 @@ class FlairGame:
             self.restock_timer -= 1
             if self.restock_timer <= 0:
                 self.inventory = {
-                    DrinkType.BEER: 20,
-                    DrinkType.WINE: 20,
-                    DrinkType.COCKTAIL: 20
+                    DrinkType.BEER: 5,
+                    DrinkType.WINE: 5,
+                    DrinkType.COCKTAIL: 5
                 }
                 self.is_restocking = False
                 self.hook_restock_complete()
