@@ -464,11 +464,11 @@ class FlairGame:
         if self.images['floor']:
             self.create_floor_pattern()
         
-        # Load drink icons (this block should be here, not inside the 'if' above!)
+        # Load drink icons
         icon_files = {
             'beer_icon': 'assets/images/beer_icon.png',
             'wine_icon': 'assets/images/wine_icon.png',
-            'cocktail_icon': 'assets/images/cocktail_icon.png'
+            'cocktail_icon': 'assets/images/cocktail_icon.png',
             'heart_icon': 'assets/images/heart.png'
         }
         for icon_name, icon_path in icon_files.items():
@@ -543,47 +543,46 @@ class FlairGame:
             self.controller = None
     
     def setup_menus(self):
-        """Setup all menu buttons and UI elements with improved spacing"""
-        # Main Menu Buttons
-        button_width = 220
-        button_height = 55
+        """Setup all menu buttons and UI elements with clean hierarchy"""
+        # MAIN MENU - Clean vertical layout with proper spacing from subtitle
+        button_width = 200
+        button_height = 50
         center_x = SCREEN_WIDTH // 2 - button_width // 2
-        start_y = 350
-        spacing = 90
+        start_y = 220  # Positioned below the subtitle with breathing room
+        button_spacing = 80
         
         self.main_menu_buttons = [
             Button(center_x, start_y, button_width, button_height, "New Game", self.font, self.start_new_game),
-            Button(center_x, start_y + spacing, button_width, button_height, "High Scores", self.font, self.show_leaderboard),
-            Button(center_x, start_y + spacing * 2, button_width, button_height, "Settings", self.font, self.show_settings),
-            Button(center_x, start_y + spacing * 3, button_width, button_height, "Quit", self.font, self.quit_game)
+            Button(center_x, start_y + button_spacing, button_width, button_height, "High Scores", self.font, self.show_leaderboard),
+            Button(center_x, start_y + button_spacing * 2, button_width, button_height, "Settings", self.font, self.show_settings),
+            Button(center_x, start_y + button_spacing * 3, button_width, button_height, "Quit", self.font, self.quit_game)
         ]
         
-        # Settings Menu Elements
+        # SETTINGS - Clean layout with proper grouping
         self.settings_buttons = [
-            Button(80, SCREEN_HEIGHT - 120, 120, 50, "Back", self.font, self.show_main_menu),
-            Button(250, SCREEN_HEIGHT - 120, 180, 50, "Controller Setup", self.small_font, self.show_controller_setup)
+            Button(50, SCREEN_HEIGHT - 80, 100, 40, "Back", self.font, self.show_main_menu),
+            Button(200, SCREEN_HEIGHT - 80, 160, 40, "Controller Setup", self.small_font, self.show_controller_setup)
         ]
         
-        # Better positioned sliders
-        slider_x = 400
-        self.sound_slider = Slider(slider_x, 250, 300, 0.0, 1.0, self.settings.sound_volume, "Sound Volume")
-        self.music_slider = Slider(slider_x, 350, 300, 0.0, 1.0, self.settings.music_volume, "Music Volume")
+        # Sliders positioned for settings menu layout
+        slider_x = 350
+        self.sound_slider = Slider(slider_x, 290, 250, 0.0, 1.0, self.settings.sound_volume, "Sound Volume")
+        self.music_slider = Slider(slider_x, 360, 250, 0.0, 1.0, self.settings.music_volume, "Music Volume")
         
-        # Leaderboard Buttons
+        # OTHER MENUS
         self.leaderboard_buttons = [
-            Button(80, SCREEN_HEIGHT - 120, 120, 50, "Back", self.font, self.show_main_menu)
+            Button(50, SCREEN_HEIGHT - 80, 100, 40, "Back", self.font, self.show_main_menu)
         ]
         
-        # Controller Setup Buttons
         self.controller_buttons = [
-            Button(80, SCREEN_HEIGHT - 120, 120, 50, "Back", self.font, self.show_settings),
-            Button(250, SCREEN_HEIGHT - 120, 180, 50, "Detect Controller", self.small_font, self.init_controller)
+            Button(50, SCREEN_HEIGHT - 80, 100, 40, "Back", self.font, self.show_settings),
+            Button(200, SCREEN_HEIGHT - 80, 150, 40, "Detect Controller", self.small_font, self.init_controller)
         ]
         
-        # Game Over Buttons
+        # GAME OVER
         self.game_over_buttons = [
-            Button(center_x, start_y + spacing, button_width, button_height, "Main Menu", self.font, self.show_main_menu),
-            Button(center_x, start_y + spacing * 2, button_width, button_height, "Play Again", self.font, self.start_new_game)
+            Button(center_x, start_y + button_spacing, button_width, button_height, "Main Menu", self.font, self.show_main_menu),
+            Button(center_x, start_y + button_spacing * 2, button_width, button_height, "Play Again", self.font, self.start_new_game)
         ]
     
     def load_audio_assets(self):
@@ -781,8 +780,8 @@ class FlairGame:
                 button.update(mouse_pos, mouse_clicked)
         
         elif self.state == GameState.GAME_OVER:
-            for button in self.game_over_buttons:
-                button.update(mouse_pos, mouse_clicked)
+            # Button handling is now done in draw_game_over_menu
+            pass
         
         elif self.state == GameState.PLAYING:
             # Handle mouse throwing
@@ -1051,71 +1050,76 @@ class FlairGame:
     def draw_menu_background(self):
         self.screen.fill(COLORS['menu_bg'])
         
-        # Draw title with improved positioning
-        title_surface = self.title_font.render("🍺 Flair! 🍺", True, COLORS['text_gold'])
-        title_rect = title_surface.get_rect(center=(SCREEN_WIDTH // 2, 180))
-        self.screen.blit(title_surface, title_rect)
+        # Flair title with beer icons - well spaced at top
+        flair_surface = self.title_font.render("Flair!", True, COLORS['text_gold'])
+        flair_rect = flair_surface.get_rect(center=(SCREEN_WIDTH // 2, 80))
+        self.screen.blit(flair_surface, flair_rect)
         
-        # Draw subtitle
-        subtitle = "Master the Art of Cocktail Combat"
-        subtitle_surface = self.font.render(subtitle, True, COLORS['text_white'])
-        subtitle_rect = subtitle_surface.get_rect(center=(SCREEN_WIDTH // 2, 240))
-        self.screen.blit(subtitle_surface, subtitle_rect)
+        # Beer icons on both sides, 20px apart
+        beer_icon = self.images.get('beer_icon')
+        if beer_icon:
+            # Left beer icon
+            left_beer_x = flair_rect.left - 20 - 32
+            self.screen.blit(beer_icon, (left_beer_x, flair_rect.centery - 16))
+            # Right beer icon  
+            right_beer_x = flair_rect.right + 20
+            self.screen.blit(beer_icon, (right_beer_x, flair_rect.centery - 16))
     
     def draw_main_menu(self):
         self.draw_menu_background()
         
+        # Subtitle with proper spacing below Flair! title
+        subtitle = "Master the Art of Cocktail Combat"
+        subtitle_surface = self.font.render(subtitle, True, COLORS['text_white'])
+        subtitle_rect = subtitle_surface.get_rect(center=(SCREEN_WIDTH // 2, 140))
+        self.screen.blit(subtitle_surface, subtitle_rect)
+        
         for button in self.main_menu_buttons:
             button.draw(self.screen)
         
-        # Draw controller status - better positioned
+        # Footer info - properly spaced
         controller_status = "Controller: Connected" if self.controller else "Controller: Not Connected"
         controller_color = COLORS['text_green'] if self.controller else COLORS['text_gray']
         status_surface = self.small_font.render(controller_status, True, controller_color)
-        self.screen.blit(status_surface, (80, SCREEN_HEIGHT - 40))
+        self.screen.blit(status_surface, (50, SCREEN_HEIGHT - 50))
         
-        # Draw version or credits
         credits_surface = self.small_font.render("Made with Pygame", True, COLORS['text_gray'])
-        credits_rect = credits_surface.get_rect(right=SCREEN_WIDTH - 80, bottom=SCREEN_HEIGHT - 40)
+        credits_rect = credits_surface.get_rect(right=SCREEN_WIDTH - 50, bottom=SCREEN_HEIGHT - 30)
         self.screen.blit(credits_surface, credits_rect)
     
     def draw_settings_menu(self):
         self.draw_menu_background()
         
-        # Draw settings title
+        # Page title - properly spaced below Flair!
         title_surface = self.large_font.render("Settings", True, COLORS['text_gold'])
-        title_rect = title_surface.get_rect(center=(SCREEN_WIDTH // 2, 120))
+        title_rect = title_surface.get_rect(center=(SCREEN_WIDTH // 2, 160))
         self.screen.blit(title_surface, title_rect)
         
-        # Draw sliders with labels
-        self.sound_slider.draw(self.screen, self.font)
-        self.music_slider.draw(self.screen, self.font)
+        # Audio section with clear grouping - moved down for proper spacing
+        section_y = 240  # More space from title
+        section_surface = self.font.render("Audio Settings", True, COLORS['text_gold'])
+        self.screen.blit(section_surface, (200, section_y))
         
-        # Draw controller settings
-        controller_y = 450
+        # Sliders with proper spacing from section header
+        self.sound_slider.draw(self.screen, self.small_font)
+        self.music_slider.draw(self.screen, self.small_font)
+        
+        # Controller section - clearly separated with more space
+        controller_y = 460  # Much more space from audio section
+        controller_section = self.font.render("Controller Settings", True, COLORS['text_gold'])
+        self.screen.blit(controller_section, (200, controller_y))
+        
         controller_status = "ENABLED" if self.settings.controller_enabled else "DISABLED"
         controller_color = COLORS['text_green'] if self.settings.controller_enabled else COLORS['text_red']
         
-        controller_label = self.font.render("Controller Support:", True, COLORS['text_white'])
-        self.screen.blit(controller_label, (400, controller_y))
+        controller_label = self.small_font.render("Controller Support:", True, COLORS['text_white'])
+        self.screen.blit(controller_label, (200, controller_y + 40))
         
-        controller_status_surface = self.font.render(controller_status, True, controller_color)
-        self.screen.blit(controller_status_surface, (600, controller_y))
+        controller_status_surface = self.small_font.render(controller_status, True, controller_color)
+        self.screen.blit(controller_status_surface, (350, controller_y + 40))
         
         controller_hint = self.small_font.render("Press 'C' to toggle", True, COLORS['text_gray'])
-        self.screen.blit(controller_hint, (400, controller_y + 30))
-        
-        # Instructions
-        instructions_y = 550
-        instructions = [
-            "• Use sliders to adjust audio levels",
-            "• Changes apply immediately",
-            "• Settings are saved automatically"
-        ]
-        
-        for i, instruction in enumerate(instructions):
-            instruction_surface = self.small_font.render(instruction, True, COLORS['text_white'])
-            self.screen.blit(instruction_surface, (200, instructions_y + i * 25))
+        self.screen.blit(controller_hint, (200, controller_y + 65))
         
         for button in self.settings_buttons:
             button.draw(self.screen)
@@ -1123,38 +1127,49 @@ class FlairGame:
     def draw_leaderboard_menu(self):
         self.draw_menu_background()
         
+        # Page title - properly spaced below Flair!
         title_surface = self.large_font.render("High Scores", True, COLORS['text_gold'])
-        title_rect = title_surface.get_rect(center=(SCREEN_WIDTH // 2, 120))
+        title_rect = title_surface.get_rect(center=(SCREEN_WIDTH // 2, 160))
         self.screen.blit(title_surface, title_rect)
         
-        # Draw high scores with better spacing
-        y_start = 200
+        # High scores table with clean spacing - moved down for breathing room
         if not self.high_score_manager.high_scores:
             no_scores_text = "No high scores yet! Play a game to set one."
             no_scores_surface = self.font.render(no_scores_text, True, COLORS['text_white'])
-            no_scores_rect = no_scores_surface.get_rect(center=(SCREEN_WIDTH // 2, 350))
+            no_scores_rect = no_scores_surface.get_rect(center=(SCREEN_WIDTH // 2, 400))
             self.screen.blit(no_scores_surface, no_scores_rect)
         else:
-            headers = ["Rank", "Name", "Score", "Wave", "Date"]
-            header_x_positions = [250, 350, 500, 600, 750]
+            # Table with clean columns and no overlap
+            table_start_y = 220  # More space from title
+            headers = ["#", "Name", "Score", "Wave", "Date"]
+            col_widths = [60, 150, 100, 80, 120]
+            col_x_positions = []
+            
+            # Calculate column positions to prevent overlap
+            x = 150
+            for width in col_widths:
+                col_x_positions.append(x)
+                x += width + 20  # 20px padding between columns
             
             # Draw headers
             for i, header in enumerate(headers):
                 header_surface = self.font.render(header, True, COLORS['text_gold'])
-                self.screen.blit(header_surface, (header_x_positions[i], y_start))
+                self.screen.blit(header_surface, (col_x_positions[i], table_start_y))
             
-            # Draw separator line
+            # Header separator
             pygame.draw.line(self.screen, COLORS['text_gold'], 
-                           (250, y_start + 30), (850, y_start + 30), 2)
+                           (col_x_positions[0], table_start_y + 35), 
+                           (col_x_positions[-1] + col_widths[-1], table_start_y + 35), 2)
             
-            # Draw scores
+            # Draw scores with proper row spacing
+            row_height = 35
             for i, score in enumerate(self.high_score_manager.high_scores):
-                y_pos = y_start + 50 + i * 35
+                y_pos = table_start_y + 50 + i * row_height
                 values = [str(i + 1), score.name, str(score.score), str(score.wave), score.date.split()[0]]
                 
                 for j, value in enumerate(values):
                     value_surface = self.small_font.render(value, True, COLORS['text_white'])
-                    self.screen.blit(value_surface, (header_x_positions[j], y_pos))
+                    self.screen.blit(value_surface, (col_x_positions[j], y_pos))
         
         for button in self.leaderboard_buttons:
             button.draw(self.screen)
@@ -1163,17 +1178,28 @@ class FlairGame:
         self.draw_menu_background()
         
         title_surface = self.large_font.render("Controller Setup", True, COLORS['text_gold'])
-        title_rect = title_surface.get_rect(center=(SCREEN_WIDTH // 2, 120))
+        title_rect = title_surface.get_rect(center=(SCREEN_WIDTH // 2, 100))
         self.screen.blit(title_surface, title_rect)
         
         if self.controller:
+            # Controller info with proper spacing
+            info_start_y = 180
             controller_info = [
                 f"Controller: {self.controller.get_name()}",
                 f"Buttons: {self.controller.get_numbuttons()}",
-                f"Axes: {self.controller.get_numaxes()}",
-                "",
-                "Default Xbox Controller Mapping:",
-                "",
+                f"Axes: {self.controller.get_numaxes()}"
+            ]
+            
+            for i, info in enumerate(controller_info):
+                info_surface = self.small_font.render(info, True, COLORS['text_white'])
+                self.screen.blit(info_surface, (200, info_start_y + i * 30))
+            
+            # Mapping section - clearly separated
+            mapping_start_y = 300
+            mapping_title = self.font.render("Button Mapping (Xbox Controller):", True, COLORS['text_gold'])
+            self.screen.blit(mapping_title, (200, mapping_start_y))
+            
+            mappings = [
                 "A Button (0) - Select Beer",
                 "B Button (1) - Select Wine", 
                 "X Button (2) - Select Cocktail",
@@ -1183,19 +1209,9 @@ class FlairGame:
                 "Left Stick - Aim & Target"
             ]
             
-            start_y = 200
-            for i, info in enumerate(controller_info):
-                if "Default Xbox" in info:
-                    color = COLORS['text_gold']
-                elif info.startswith(("A Button", "B Button", "X Button", "Y Button", "Start Button", "Right Bumper", "Left Stick")):
-                    color = COLORS['text_white']
-                elif info == "":
-                    continue
-                else:
-                    color = COLORS['text_white']
-                
-                info_surface = self.small_font.render(info, True, color)
-                self.screen.blit(info_surface, (300, start_y + i * 30))
+            for i, mapping in enumerate(mappings):
+                mapping_surface = self.small_font.render(mapping, True, COLORS['text_white'])
+                self.screen.blit(mapping_surface, (220, mapping_start_y + 40 + i * 25))
         else:
             no_controller_text = "No controller detected."
             no_controller_surface = self.font.render(no_controller_text, True, COLORS['text_red'])
@@ -1213,12 +1229,13 @@ class FlairGame:
     def draw_game_over_menu(self):
         self.draw_menu_background()
         
-        # Game over title
+        # Page title - properly spaced below Flair!
         title_surface = self.large_font.render("Game Over!", True, COLORS['text_red'])
-        title_rect = title_surface.get_rect(center=(SCREEN_WIDTH // 2, 200))
+        title_rect = title_surface.get_rect(center=(SCREEN_WIDTH // 2, 160))
         self.screen.blit(title_surface, title_rect)
         
-        # Final stats
+        # Stats section - clearly separated from title with more breathing room
+        stats_y = 240  # More space from title
         stats = [
             f"Final Score: {self.score}",
             f"Wave Reached: {self.wave}",
@@ -1227,33 +1244,52 @@ class FlairGame:
         
         for i, stat in enumerate(stats):
             stat_surface = self.font.render(stat, True, COLORS['text_white'])
-            stat_rect = stat_surface.get_rect(center=(SCREEN_WIDTH // 2, 260 + i * 30))
+            stat_rect = stat_surface.get_rect(center=(SCREEN_WIDTH // 2, stats_y + i * 40))
             self.screen.blit(stat_surface, stat_rect)
         
-        # High score input
+        # High score input section - well separated from stats
         if self.input_active:
+            input_y = 380  # More space from stats
             input_prompt = "New High Score! Enter your name:"
             prompt_surface = self.font.render(input_prompt, True, COLORS['text_gold'])
-            prompt_rect = prompt_surface.get_rect(center=(SCREEN_WIDTH // 2, 380))
+            prompt_rect = prompt_surface.get_rect(center=(SCREEN_WIDTH // 2, input_y))
             self.screen.blit(prompt_surface, prompt_rect)
             
-            # Input box
-            input_box = pygame.Rect(SCREEN_WIDTH // 2 - 100, 420, 200, 30)
+            # Input box - proper spacing below prompt
+            input_box = pygame.Rect(SCREEN_WIDTH // 2 - 100, input_y + 50, 200, 35)
             pygame.draw.rect(self.screen, COLORS['text_white'], input_box)
             pygame.draw.rect(self.screen, COLORS['text_gold'], input_box, 2)
             
             # Input text
             input_surface = self.font.render(self.input_text, True, COLORS['text_red'])
-            self.screen.blit(input_surface, (input_box.x + 5, input_box.y + 5))
+            self.screen.blit(input_surface, (input_box.x + 8, input_box.y + 6))
             
-            # Instructions
+            # Instructions - proper spacing below input box
             instruction = "Press Enter to save"
             instruction_surface = self.small_font.render(instruction, True, COLORS['text_white'])
-            instruction_rect = instruction_surface.get_rect(center=(SCREEN_WIDTH // 2, 470))
+            instruction_rect = instruction_surface.get_rect(center=(SCREEN_WIDTH // 2, input_y + 110))
             self.screen.blit(instruction_surface, instruction_rect)
         
-        for button in self.game_over_buttons:
-            button.draw(self.screen)
+        # Buttons moved much closer to bottom with proper spacing
+        button_width = 200
+        button_height = 50
+        center_x = SCREEN_WIDTH // 2 - button_width // 2
+        buttons_start_y = SCREEN_HEIGHT - 180  # Much closer to bottom
+        button_spacing = 70
+        
+        # Create buttons at new positions
+        main_menu_btn = Button(center_x, buttons_start_y, button_width, button_height, "Main Menu", self.font, self.show_main_menu)
+        play_again_btn = Button(center_x, buttons_start_y + button_spacing, button_width, button_height, "Play Again", self.font, self.start_new_game)
+        
+        # Update and draw buttons
+        mouse_pos = pygame.mouse.get_pos()
+        mouse_clicked = pygame.mouse.get_pressed()[0]
+        
+        main_menu_btn.update(mouse_pos, mouse_clicked)
+        play_again_btn.update(mouse_pos, mouse_clicked)
+        
+        main_menu_btn.draw(self.screen)
+        play_again_btn.draw(self.screen)
     
     def draw_bar(self):
         bar_size = 60
@@ -1356,99 +1392,124 @@ class FlairGame:
             )
     
     def draw_game_ui(self):
-        # --- Title with beer icons ---
-        title_surface = self.large_font.render("Flair!", True, COLORS['text_gold'])
-        title_rect = title_surface.get_rect(center=(SCREEN_WIDTH // 2, 30))
+        """Clean, hierarchical game UI with no overlapping elements"""
+        
+        # TOP SECTION - Title with beer icons
+        title_surface = self.font.render("Flair!", True, COLORS['text_gold'])
+        title_rect = title_surface.get_rect(center=(SCREEN_WIDTH // 2, 25))
         self.screen.blit(title_surface, title_rect)
+        
+        # Beer icons on both sides, 20px apart
         beer_icon = self.images.get('beer_icon')
         if beer_icon:
-            self.screen.blit(beer_icon, (title_rect.left - 40, title_rect.centery - 16))
-            self.screen.blit(beer_icon, (title_rect.right + 8, title_rect.centery - 16))
-
-        # --- Stats Bar ---
-        stats_x = 50
-        stats_y = 60
-        # Score
-        score_surface = self.small_font.render(f"Score: {self.score}", True, COLORS['text_white'])
-        self.screen.blit(score_surface, (stats_x, stats_y))
-        # Wave
-        wave_surface = self.small_font.render(f"Wave: {self.wave}", True, COLORS['text_white'])
-        self.screen.blit(wave_surface, (stats_x + 160, stats_y))
-        # Served
-        served_surface = self.small_font.render(f"Served: {self.customers_served}", True, COLORS['text_white'])
-        self.screen.blit(served_surface, (stats_x + 320, stats_y))
-        # Lives (show heart icons)
-        lives_surface = self.small_font.render("Lives:", True, COLORS['text_white'])
-        self.screen.blit(lives_surface, (stats_x + 480, stats_y))
+            # Left beer icon
+            left_beer_x = title_rect.left - 20 - 32
+            self.screen.blit(beer_icon, (left_beer_x, title_rect.centery - 16))
+            # Right beer icon  
+            right_beer_x = title_rect.right + 20
+            self.screen.blit(beer_icon, (right_beer_x, title_rect.centery - 16))
+        
+        # TOP LEFT - Lives (clearly separated)
+        lives_x = 30
+        lives_y = 60
+        lives_label = self.small_font.render("Lives:", True, COLORS['text_white'])
+        self.screen.blit(lives_label, (lives_x, lives_y))
+        
         heart_icon = self.images.get('heart_icon')
         for i in range(self.lives):
+            heart_x = lives_x + 65 + i * 35
             if heart_icon:
-                self.screen.blit(heart_icon, (stats_x + 550 + i*34, stats_y))
+                self.screen.blit(heart_icon, (heart_x, lives_y))
             else:
                 heart_surface = self.small_font.render("❤️", True, COLORS['text_red'])
-                self.screen.blit(heart_surface, (stats_x + 550 + i*34, stats_y))
-
-        # --- Inventory (top right, spaced and iconified) ---
-        inv_x = SCREEN_WIDTH - 320
-        inv_y = 50
+                self.screen.blit(heart_surface, (heart_x, lives_y))
+        
+        # TOP CENTER - Main Stats (properly spaced)
+        stats_y = 60
+        score_text = f"Score: {self.score}"
+        score_surface = self.small_font.render(score_text, True, COLORS['text_white'])
+        score_rect = score_surface.get_rect(center=(SCREEN_WIDTH // 2 - 100, stats_y))
+        self.screen.blit(score_surface, score_rect)
+        
+        wave_text = f"Wave: {self.wave}"
+        wave_surface = self.small_font.render(wave_text, True, COLORS['text_white'])
+        wave_rect = wave_surface.get_rect(center=(SCREEN_WIDTH // 2, stats_y))
+        self.screen.blit(wave_surface, wave_rect)
+        
+        served_text = f"Served: {self.customers_served}"
+        served_surface = self.small_font.render(served_text, True, COLORS['text_white'])
+        served_rect = served_surface.get_rect(center=(SCREEN_WIDTH // 2 + 100, stats_y))
+        self.screen.blit(served_surface, served_rect)
+        
+        # TOP RIGHT - Inventory (clean layout)
+        inv_label = self.small_font.render("Inventory:", True, COLORS['text_white'])
+        self.screen.blit(inv_label, (SCREEN_WIDTH - 280, 25))
+        
         drink_types = [DrinkType.BEER, DrinkType.WINE, DrinkType.COCKTAIL]
         drink_keys = ['1', '2', '3']
         icon_names = ['beer_icon', 'wine_icon', 'cocktail_icon']
+        
         for i, (drink_type, key, icon_name) in enumerate(zip(drink_types, drink_keys, icon_names)):
-            x = inv_x + i * 90
-            # Gold ring for selected drink
+            x = SCREEN_WIDTH - 250 + i * 80
+            y = 70  # Moved down from 50 to give breathing room from "Inventory" label
+            
+            # Selection indicator
             if drink_type == self.selected_drink:
-                pygame.draw.circle(self.screen, COLORS['text_gold'], (x, inv_y), 22, 3)
+                pygame.draw.circle(self.screen, COLORS['text_gold'], (x, y), 25, 3)
+            
+            # Drink icon
             icon_img = self.images.get(icon_name)
             if icon_img:
-                self.screen.blit(icon_img, (x - 16, inv_y - 16))
+                self.screen.blit(icon_img, (x - 16, y - 16))
             else:
                 color = self.get_drink_color(drink_type)
-                pygame.draw.circle(self.screen, color, (x, inv_y), 18)
-            # Drink count
-            count_surface = self.small_font.render(str(self.inventory[drink_type]), True, COLORS['text_white'])
-            count_rect = count_surface.get_rect(center=(x, inv_y + 30))
+                pygame.draw.circle(self.screen, color, (x, y), 18)
+            
+            # Count and key - positioned to avoid overlap
+            count_text = str(self.inventory[drink_type])
+            count_surface = self.small_font.render(count_text, True, COLORS['text_white'])
+            count_rect = count_surface.get_rect(center=(x, y + 30))
             self.screen.blit(count_surface, count_rect)
-            # Key label
-            key_surface = self.small_font.render(f"({key})", True, COLORS['text_gold'])
-            key_rect = key_surface.get_rect(center=(x, inv_y + 50))
+            
+            key_text = f"({key})"
+            key_surface = self.small_font.render(key_text, True, COLORS['text_gold'])
+            key_rect = key_surface.get_rect(center=(x, y + 50))
             self.screen.blit(key_surface, key_rect)
-
-        # --- Controls (bottom, spaced out) ---
+        
+        # BOTTOM SECTION - Controls (single clean line)
         controls_y = SCREEN_HEIGHT - 60
-        controls = [
-            "1/2/3: Select drinks",
-            "Mouse/Controller: Aim & throw",
-            "R: Restock",
-            "P: Pause | ESC: Menu"
-        ]
-        for i, control in enumerate(controls):
-            control_surface = self.small_font.render(control, True, COLORS['text_white'])
-            self.screen.blit(control_surface, (60 + i * 270, controls_y))
-
-        # --- Wave info (bottom center) ---
-        wave_info = f"Wave {self.wave} - {self.customers_in_wave}/{self.wave_size} spawned"
-        wave_surface = self.font.render(wave_info, True, COLORS['text_gold'])
+        controls_text = "1/2/3: Select Drinks  |  Mouse/Controller: Aim & Throw  |  R: Restock  |  P: Pause  |  ESC: Menu"
+        controls_surface = self.small_font.render(controls_text, True, COLORS['text_white'])
+        controls_rect = controls_surface.get_rect(center=(SCREEN_WIDTH // 2, controls_y))
+        self.screen.blit(controls_surface, controls_rect)
+        
+        # BOTTOM CENTER - Wave Progress (clearly separated)
+        wave_info = f"Wave {self.wave} Progress: {self.customers_in_wave}/{self.wave_size}"
+        wave_surface = self.small_font.render(wave_info, True, COLORS['text_gold'])
         wave_rect = wave_surface.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT - 30))
         self.screen.blit(wave_surface, wave_rect)
-
-        # --- Restock overlay ---
+        
+        # OVERLAYS - Only when active
         if self.is_restocking:
+            # Semi-transparent overlay
             overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
-            overlay.fill((0, 0, 0, 128))
+            overlay.fill((0, 0, 0, 150))
             self.screen.blit(overlay, (0, 0))
+            
+            # Restock info - clearly centered
             restock_text = "RESTOCKING..."
             restock_surface = self.large_font.render(restock_text, True, COLORS['text_gold'])
-            restock_rect = restock_surface.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+            restock_rect = restock_surface.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 30))
             self.screen.blit(restock_surface, restock_rect)
-            time_text = f"{self.restock_timer // 60 + 1} seconds remaining"
-            time_surface = self.font.render(time_text, True, COLORS['text_white'])
-            time_rect = time_surface.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50))
+            
+            time_remaining = f"{self.restock_timer // 60 + 1} seconds remaining"
+            time_surface = self.font.render(time_remaining, True, COLORS['text_white'])
+            time_rect = time_surface.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 30))
             self.screen.blit(time_surface, time_rect)
-
-        # --- Pause overlay ---
+        
         if self.paused:
-            pause_surface = self.large_font.render("PAUSED - Press P to continue", True, COLORS['text_gold'])
+            pause_text = "PAUSED - Press P to continue"
+            pause_surface = self.large_font.render(pause_text, True, COLORS['text_gold'])
             pause_rect = pause_surface.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
             self.screen.blit(pause_surface, pause_rect)
     
@@ -1494,5 +1555,4 @@ class FlairGame:
 
 if __name__ == "__main__":
     game = FlairGame()
-
     game.run()
