@@ -1,7 +1,6 @@
 """Game constants and configuration."""
 
 from enum import Enum
-from typing import Tuple
 
 # Screen settings
 SCREEN_WIDTH = 1200

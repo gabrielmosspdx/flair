@@ -1,13 +1,14 @@
 """Comprehensive settings scene with tabs for all configuration options."""
 
-from typing import List, Dict, Any, Tuple
+from typing import Dict, List
+
 import pygame
 
-from .base_scene import BaseScene
 from ..ui import Button, Slider
+from ..utils.config import config
 from ..utils.constants import COLORS
 from ..utils.logger import game_logger
-from ..utils.config import config
+from .base_scene import BaseScene
 
 
 class SettingsScene(BaseScene):
@@ -39,7 +40,6 @@ class SettingsScene(BaseScene):
     def setup_ui(self):
         """Setup UI elements for all tabs."""
         font = self.game.assets.get_font("normal")
-        small_font = self.game.assets.get_font("small")
 
         # Create tab buttons
         tab_width = 150
@@ -236,9 +236,6 @@ class SettingsScene(BaseScene):
 
     def setup_debug_tab(self):
         """Setup Debug tab UI elements."""
-        y_start = 220
-        y_spacing = 40
-
         # Debug checkboxes - only show_collision_boxes and dev_mode remain
         self.checkboxes["Debug"]["show_collision_boxes"] = config.get(
             "debug.show_collision_boxes", False
@@ -418,7 +415,6 @@ class SettingsScene(BaseScene):
     def draw_tab_content(self, screen: pygame.Surface):
         """Draw content for the current tab."""
         current_tab_name = self.tabs[self.current_tab]
-        font = self.game.assets.get_font("normal")
         small_font = self.game.assets.get_font("small")
 
         if current_tab_name == "Gameplay":

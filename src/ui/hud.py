@@ -1,6 +1,7 @@
 """Heads-up display (HUD) for the game."""
 
 from typing import Dict, Optional
+
 import pygame
 
 from ..utils.constants import COLORS, DrinkType

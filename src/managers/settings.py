@@ -2,14 +2,14 @@
 
 import json
 import os
-from dataclasses import dataclass, asdict
-from typing import Dict, Any, Optional
+from dataclasses import asdict, dataclass
+from typing import Dict, Optional
 
 from ..utils.constants import (
-    DEFAULT_SOUND_VOLUME,
-    DEFAULT_MUSIC_VOLUME,
     DEFAULT_CONTROLLER_DEADZONE,
     DEFAULT_CONTROLLER_MAPPINGS,
+    DEFAULT_MUSIC_VOLUME,
+    DEFAULT_SOUND_VOLUME,
     SETTINGS_FILE,
 )
 

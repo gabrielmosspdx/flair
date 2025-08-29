@@ -1,12 +1,13 @@
 """Game over scene."""
 
 from typing import List
+
 import pygame
 
-from .base_scene import BaseScene
 from ..ui import Button
 from ..utils.constants import COLORS
 from ..utils.logger import game_logger
+from .base_scene import BaseScene
 
 
 class GameOverScene(BaseScene):

@@ -1,8 +1,10 @@
 """Centralized input management system."""
 
-from typing import Dict, List, Optional, Tuple, Callable
+from typing import Any, Dict, List, Optional, Tuple
+
 import pygame
-from ..utils.constants import DEFAULT_CONTROLLER_MAPPINGS, DEFAULT_CONTROLLER_DEADZONE
+
+from ..utils.constants import DEFAULT_CONTROLLER_DEADZONE, DEFAULT_CONTROLLER_MAPPINGS
 
 
 class InputManager:
@@ -19,7 +21,7 @@ class InputManager:
         self.mouse_position: Tuple[int, int] = (0, 0)
         self.mouse_delta: Tuple[int, int] = (0, 0)
 
-        self.controller: Optional[pygame.joystick.Joystick] = None
+        self.controller: Optional[Any] = None  # pygame.joystick.Joystick
         self.controller_buttons: Dict[int, bool] = {}
         self.controller_axes: Dict[int, float] = {}
         self.controller_deadzone = DEFAULT_CONTROLLER_DEADZONE

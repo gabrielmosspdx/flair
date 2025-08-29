@@ -1,7 +1,7 @@
 """Particle effects for the Flair game."""
 
 import random
-from typing import Tuple, Any
+from typing import Any, Tuple
 
 import pygame
 
@@ -62,7 +62,7 @@ class ParticleSystem:
 
     def __init__(self):
         """Initialize the particle system."""
-        self.particles = pygame.sprite.Group()
+        self.particles: pygame.sprite.Group = pygame.sprite.Group()
 
     def create_burst(self, x: float, y: float, color: Tuple[int, int, int], count: int = 8) -> None:
         """Create a burst of particles.

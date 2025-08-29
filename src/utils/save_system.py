@@ -1,10 +1,10 @@
 """Save and load system for game persistence."""
 
 import json
-import os
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, Optional, List, cast
+from typing import Any, Dict, List, Optional, cast
+
 from ..utils.logger import game_logger
 
 

@@ -1,16 +1,16 @@
 """Tests for configuration system."""
 
-import unittest
 import json
-import tempfile
-from pathlib import Path
-import sys
 import os
+import sys
+import tempfile
+import unittest
+from pathlib import Path
 
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from src.utils.config import Config
+from src.utils.config import Config  # noqa: E402
 
 
 class TestConfig(unittest.TestCase):

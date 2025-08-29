@@ -1,9 +1,8 @@
 """Configuration management system."""
 
 import json
-import os
-from typing import Any, Dict, Optional
 from pathlib import Path
+from typing import Any, Dict, Optional
 
 
 class Config:

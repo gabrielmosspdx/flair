@@ -1,8 +1,7 @@
 """Object pooling system for efficient resource management."""
 
-from typing import TypeVar, Generic, List, Callable, Optional
 from collections import deque
-
+from typing import Callable, Generic, List, Optional, TypeVar
 
 T = TypeVar("T")
 

@@ -1,12 +1,13 @@
 """Main menu scene."""
 
 from typing import List
+
 import pygame
 
-from .base_scene import BaseScene
 from ..ui import Button
 from ..utils.constants import COLORS
 from ..utils.logger import game_logger
+from .base_scene import BaseScene
 
 
 class MainMenuScene(BaseScene):
@@ -24,7 +25,6 @@ class MainMenuScene(BaseScene):
     def setup_ui(self):
         """Setup menu UI elements."""
         screen_width = self.game.screen.get_width()
-        screen_height = self.game.screen.get_height()
 
         button_width = 200
         button_height = 50

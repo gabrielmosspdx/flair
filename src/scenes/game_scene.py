@@ -2,15 +2,16 @@
 
 import random
 from typing import List
+
 import pygame
 
-from .base_scene import BaseScene
-from ..entities import Customer, Projectile, ParticleSystem
-from ..utils.constants import COLORS, DrinkType, PROJECTILE_MAX_LIFE
+from ..entities import Customer, ParticleSystem, Projectile
 from ..utils.config import config
-from ..utils.logger import game_logger
+from ..utils.constants import COLORS, PROJECTILE_MAX_LIFE, PROJECTILE_SPEED, DrinkType
 from ..utils.debug import debug_overlay
+from ..utils.logger import game_logger
 from ..utils.object_pool import ObjectPool
+from .base_scene import BaseScene
 
 
 class GameScene(BaseScene):
@@ -33,8 +34,8 @@ class GameScene(BaseScene):
         )
 
         # Sprite groups
-        self.customers = pygame.sprite.RenderUpdates()
-        self.projectiles = pygame.sprite.RenderUpdates()
+        self.customers: pygame.sprite.RenderUpdates = pygame.sprite.RenderUpdates()
+        self.projectiles: pygame.sprite.RenderUpdates = pygame.sprite.RenderUpdates()
         self.particle_system = ParticleSystem()
 
         # Initialize state variables
@@ -154,7 +155,7 @@ class GameScene(BaseScene):
 
             # Otherwise, track the best location found so far
             if min_dist_to_customers > best_min_distance:
-                best_min_distance = min_dist_to_customers
+                best_min_distance = int(min_dist_to_customers)
                 best_location = (spawn_x, spawn_y)
 
         # Use the best location found
@@ -181,7 +182,10 @@ class GameScene(BaseScene):
             return
 
         projectile = self.projectile_pool.acquire()
-        projectile.__init__(self.player_x, self.player_y, target_x, target_y, self.selected_drink)
+        # Reset the projectile with new parameters
+        projectile.reset(
+            self.player_x, self.player_y, target_x, target_y, self.selected_drink, PROJECTILE_SPEED
+        )
 
         self.projectiles.add(projectile)
         self.inventory[self.selected_drink] -= 1
@@ -259,7 +263,8 @@ class GameScene(BaseScene):
                             self.game.hud.show_score_change(points)
 
                         # Effects
-                        color = COLORS[f"{projectile.drink_type.name.lower()}"]
+                        drink_color = COLORS[f"{projectile.drink_type.name.lower()}"]
+                        color = (drink_color[0], drink_color[1], drink_color[2])
                         self.particle_system.create_burst(customer.x, customer.y, color)
                         self.game.audio.play_sound("order_success")
                     else:
@@ -270,8 +275,9 @@ class GameScene(BaseScene):
                         # Trigger HUD flash
                         if hasattr(self.game, "hud"):
                             self.game.hud.flash_lives()
+                        splat_color = COLORS["particle_splat"]
                         self.particle_system.create_burst(
-                            customer.x, customer.y, COLORS["particle_splat"]
+                            customer.x, customer.y, (splat_color[0], splat_color[1], splat_color[2])
                         )
                         self.game.audio.play_sound("order_fail")
 
@@ -360,7 +366,8 @@ class GameScene(BaseScene):
         self.customers.update()
 
         for projectile in list(self.projectiles):
-            if not projectile.update():
+            projectile.update()
+            if projectile.life <= 0:
                 projectile.kill()
                 self.projectile_pool.release(projectile)
 
@@ -385,7 +392,10 @@ class GameScene(BaseScene):
             if customer.has_reached_bar(customer_reach_threshold):
                 self.lives -= 1
                 customer.kill()
-                self.particle_system.create_burst(customer.x, customer.y, COLORS["particle_splat"])
+                splat_color = COLORS["particle_splat"]
+                self.particle_system.create_burst(
+                    customer.x, customer.y, (splat_color[0], splat_color[1], splat_color[2])
+                )
                 self.game.audio.play_sound("customer_reach_bar")
 
                 if self.lives <= 0:
@@ -504,7 +514,10 @@ class GameScene(BaseScene):
                 screen.blit(dev_surface, (10, screen.get_height() - 50))
 
                 # Wave controls help text
-                debug_text = "PageUp/Down: change wave | Shift+4-9,0: jump to waves 5-40 | F4: overlay | F6: collision boxes"
+                debug_text = (
+                    "PageUp/Down: change wave | Shift+4-9,0: jump to waves 5-40 | "
+                    "F4: overlay | F6: collision boxes"
+                )
                 text_surface = small_font.render(debug_text, True, (150, 150, 150))
                 screen.blit(text_surface, (10, screen.get_height() - 25))
         else:

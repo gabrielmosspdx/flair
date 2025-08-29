@@ -5,7 +5,7 @@ from typing import Optional
 
 import pygame
 
-from ..utils.constants import DrinkType, POSITIVE_DIALOGUE, NEGATIVE_DIALOGUE
+from ..utils.constants import NEGATIVE_DIALOGUE, POSITIVE_DIALOGUE, DrinkType
 
 
 class Customer(pygame.sprite.Sprite):
@@ -59,7 +59,7 @@ class Customer(pygame.sprite.Sprite):
     @property
     def x(self) -> float:
         """Get X position."""
-        return self.position.x
+        return float(self.position.x)
 
     @x.setter
     def x(self, value: float) -> None:
@@ -69,7 +69,7 @@ class Customer(pygame.sprite.Sprite):
     @property
     def y(self) -> float:
         """Get Y position."""
-        return self.position.y
+        return float(self.position.y)
 
     @y.setter
     def y(self, value: float) -> None:
@@ -91,7 +91,7 @@ class Customer(pygame.sprite.Sprite):
         Returns:
             Distance in pixels
         """
-        return self.position.distance_to(self.target)
+        return float(self.position.distance_to(self.target))
 
     def set_served(self, dialogue: Optional[str] = None, successful: bool = True) -> None:
         """Mark customer as served.

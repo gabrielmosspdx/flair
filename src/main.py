@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 """Main entry point for the Flair game."""
 
-import sys
 import os
+import sys
 
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from src.game import FlairGame
-from src.utils.logger import game_logger
-from src.utils.config import config
+from src.game import FlairGame  # noqa: E402
+from src.utils.config import config  # noqa: E402
+from src.utils.logger import game_logger  # noqa: E402
 
 
 def main():

@@ -9,7 +9,7 @@ In Flair!, you play as a bartender who must quickly serve the correct drinks to 
 ### Features
 
 - **Fast-paced arcade action** - Customers approach from all directions with increasing speed
-- **Three drink types** - Beer, Wine, and Cocktails to match customer preferences  
+- **Three drink types** - Beer, Wine, and Cocktails to match customer preferences
 - **Wave-based gameplay** - Survive increasingly difficult waves of thirsty customers
 - **High score system** - Compete for the top spot on the leaderboard with persistent saves
 - **Controller support** - Play with keyboard/mouse or gamepad

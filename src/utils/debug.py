@@ -1,8 +1,9 @@
 """Debug overlay and utilities for development."""
 
-from typing import Dict, List, Tuple, Optional
-import pygame
 import time
+from typing import Dict, List, Optional, Tuple
+
+import pygame
 
 
 class DebugOverlay:

@@ -1,19 +1,19 @@
 """Fully integrated game with all refactored systems properly connected (no nested classes)."""
 
+
 import pygame
-from typing import Optional
 
 from .managers import AssetManager, AudioManager, Settings
 from .managers.input_manager import InputManager
-from .scenes.scene_manager import SceneManager
-from .scenes.menu_scene import MainMenuScene
-from .scenes.game_scene import GameScene
 from .scenes.game_over_scene import GameOverScene
+from .scenes.game_scene import GameScene
+from .scenes.menu_scene import MainMenuScene
+from .scenes.scene_manager import SceneManager
 from .scenes.settings_scene import SettingsScene
 from .ui.hud import HUD
 from .utils.config import config
-from .utils.logger import game_logger
 from .utils.debug import debug_overlay
+from .utils.logger import game_logger
 from .utils.save_system import SaveSystem
 
 
@@ -40,7 +40,7 @@ class FlairGame:
         pygame.display.set_caption("Flair! - Fully Integrated Edition")
         self.clock = pygame.time.Clock()
         self.running = True
-        self.dt = 0
+        self.dt: float = 0.0
 
         # Initialize managers
         self.settings = Settings.load()
@@ -133,24 +133,24 @@ class FlairGame:
                 debug_overlay.show_collision_boxes = not debug_overlay.show_collision_boxes
                 config.set("debug.show_collision_boxes", debug_overlay.show_collision_boxes)
                 config.save()
-                game_logger.info(
-                    f"Collision boxes: {'enabled' if debug_overlay.show_collision_boxes else 'disabled'}"
-                )
+                enabled = "enabled" if debug_overlay.show_collision_boxes else "disabled"
+                game_logger.info(f"Collision boxes: {enabled}")
 
         if self.input_manager.is_key_just_pressed(pygame.K_F5):
             # Quick save (only during gameplay)
             if self.scene_manager.current_scene_name == "game":
                 game_scene = self.scene_manager.scenes["game"]
-                state = self.save_system.create_game_state(
-                    game_scene.score,
-                    game_scene.wave,
-                    game_scene.lives,
-                    game_scene.inventory,
-                    game_scene.customers_served,
-                    game_scene.selected_drink,
-                )
-                if self.save_system.autosave(state):
-                    game_logger.info("Game autosaved")
+                if isinstance(game_scene, GameScene):
+                    state = self.save_system.create_game_state(
+                        game_scene.score,
+                        game_scene.wave,
+                        game_scene.lives,
+                        game_scene.inventory,
+                        game_scene.customers_served,
+                        game_scene.selected_drink,
+                    )
+                    if self.save_system.autosave(state):
+                        game_logger.info("Game autosaved")
 
         # Pass events to current scene
         self.scene_manager.handle_events(events)
@@ -180,13 +180,19 @@ class FlairGame:
             game_data = {}
             if self.scene_manager.current_scene_name == "game":
                 game_scene = self.scene_manager.scenes["game"]
-                game_data = {
-                    "Scene": self.scene_manager.current_scene_name,
-                    "Score": game_scene.score,
-                    "Wave": game_scene.wave,
-                    "Lives": game_scene.lives,
-                    "FPS Target": self.fps,
-                }
+                if isinstance(game_scene, GameScene):
+                    game_data = {
+                        "Scene": self.scene_manager.current_scene_name,
+                        "Score": game_scene.score,
+                        "Wave": game_scene.wave,
+                        "Lives": game_scene.lives,
+                        "FPS Target": self.fps,
+                    }
+                else:
+                    game_data = {
+                        "Scene": self.scene_manager.current_scene_name,
+                        "FPS Target": self.fps,
+                    }
             else:
                 game_data = {"Scene": self.scene_manager.current_scene_name, "FPS Target": self.fps}
 
@@ -219,7 +225,7 @@ class FlairGame:
 
             # Fixed timestep updates
             while accumulator >= FIXED_TIMESTEP:
-                self.dt = FIXED_TIMESTEP
+                self.dt = float(FIXED_TIMESTEP)
                 self.update()
                 accumulator -= FIXED_TIMESTEP
 

@@ -1,7 +1,9 @@
 """Scene management system."""
 
-from typing import Dict, Optional, List
+from typing import Dict, List, Optional
+
 import pygame
+
 from .base_scene import BaseScene
 
 
@@ -79,8 +81,8 @@ class SceneManager:
         # Handle transitions
         if self.transitioning:
             if self.transition_alpha < 255:
-                self.transition_alpha = min(
-                    255, self.transition_alpha + self.transition_speed * dt * 255
+                self.transition_alpha = int(
+                    min(255, self.transition_alpha + self.transition_speed * dt * 255)
                 )
             else:
                 self._perform_switch(self.next_scene_name)

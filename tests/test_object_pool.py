@@ -1,13 +1,13 @@
 """Tests for object pooling system."""
 
-import unittest
-import sys
 import os
+import sys
+import unittest
 
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from src.utils.object_pool import ObjectPool
+from src.utils.object_pool import ObjectPool  # noqa: E402
 
 
 class MockObject:
@@ -60,7 +60,7 @@ class TestObjectPool(unittest.TestCase):
     def test_acquire_when_empty(self):
         """Test acquiring when pool is empty."""
         # Acquire all pre-created objects
-        objects = [self.pool.acquire() for _ in range(5)]
+        [self.pool.acquire() for _ in range(5)]
         self.assertEqual(self.pool.available_count, 0)
 
         # Should create new object
@@ -80,7 +80,7 @@ class TestObjectPool(unittest.TestCase):
 
     def test_release_all(self):
         """Test releasing all objects."""
-        objects = [self.pool.acquire() for _ in range(3)]
+        [self.pool.acquire() for _ in range(3)]
         self.assertEqual(len(self.pool.in_use), 3)
 
         self.pool.release_all()

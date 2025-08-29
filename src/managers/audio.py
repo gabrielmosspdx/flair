@@ -5,7 +5,7 @@ from typing import Dict, Optional
 
 import pygame
 
-from ..utils.constants import SOUNDS_DIR, MUSIC_DIR
+from ..utils.constants import MUSIC_DIR, SOUNDS_DIR
 
 
 class AudioManager:
