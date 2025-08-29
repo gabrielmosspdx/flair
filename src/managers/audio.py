@@ -27,7 +27,10 @@ class AudioManager:
         if self._initialized:
             return
         
-        pygame.mixer.init(frequency=22050, size=-16, channels=2, buffer=512)
+        # Use larger buffer for WSL2 compatibility
+        pygame.mixer.pre_init(frequency=44100, size=-16, channels=2, buffer=4096)
+        pygame.mixer.init()
+        pygame.mixer.set_num_channels(8)
         self.load_sounds()
         self.load_music()
         self.apply_volumes()
