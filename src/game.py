@@ -108,8 +108,16 @@ class FlairGame:
         
         # Global hotkeys
         if self.input_manager.is_key_just_pressed(pygame.K_F3):
-            debug_overlay.toggle()
-            game_logger.info(f"Debug overlay: {'enabled' if debug_overlay.enabled else 'disabled'}")
+            # Toggle Dev Mode
+            self.settings.dev_mode = not self.settings.dev_mode
+            self.settings.save()
+            game_logger.info(f"Dev Mode: {'enabled' if self.settings.dev_mode else 'disabled'}")
+        
+        if self.input_manager.is_key_just_pressed(pygame.K_F4):
+            # Toggle debug overlay (only works in Dev Mode)
+            if self.settings.dev_mode:
+                debug_overlay.toggle()
+                game_logger.info(f"Debug overlay: {'enabled' if debug_overlay.enabled else 'disabled'}")
         
         if self.input_manager.is_key_just_pressed(pygame.K_F5):
             # Quick save (only during gameplay)

@@ -47,7 +47,6 @@
         "show_collision_boxes": false,
         "show_entity_count": false,
         "enable_logging": true,
-        "log_level": "INFO",
-        "show_wave_controls": true
+        "log_level": "INFO"
     }
 }

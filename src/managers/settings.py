@@ -23,6 +23,7 @@ class Settings:
     controller_enabled: bool = False
     controller_deadzone: float = DEFAULT_CONTROLLER_DEADZONE
     controller_mappings: Dict[str, int] = None
+    dev_mode: bool = False
     
     def __post_init__(self):
         """Initialize controller mappings if not provided."""

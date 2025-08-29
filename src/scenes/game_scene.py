@@ -288,30 +288,31 @@ class GameScene(BaseScene):
                     self.paused = not self.paused
                 elif event.key == pygame.K_ESCAPE:
                     self.switch_to("main_menu")
-                # Debug wave jump controls - using number keys with SHIFT
-                elif event.key == pygame.K_PAGEUP:
-                    # Next wave
-                    self.jump_to_wave(self.wave + 1)
-                elif event.key == pygame.K_PAGEDOWN:
-                    # Previous wave
-                    if self.wave > 1:
-                        self.jump_to_wave(self.wave - 1)
-                # Number keys with SHIFT for specific waves
-                elif pygame.key.get_mods() & pygame.KMOD_SHIFT:
-                    if event.key == pygame.K_4:
-                        self.jump_to_wave(5)
-                    elif event.key == pygame.K_5:
-                        self.jump_to_wave(10)
-                    elif event.key == pygame.K_6:
-                        self.jump_to_wave(15)
-                    elif event.key == pygame.K_7:
-                        self.jump_to_wave(20)
-                    elif event.key == pygame.K_8:
-                        self.jump_to_wave(25)
-                    elif event.key == pygame.K_9:
-                        self.jump_to_wave(30)
-                    elif event.key == pygame.K_0:
-                        self.jump_to_wave(40)
+                # Debug wave jump controls - only in Dev Mode
+                elif self.game.settings.dev_mode:
+                    if event.key == pygame.K_PAGEUP:
+                        # Next wave
+                        self.jump_to_wave(self.wave + 1)
+                    elif event.key == pygame.K_PAGEDOWN:
+                        # Previous wave
+                        if self.wave > 1:
+                            self.jump_to_wave(self.wave - 1)
+                    # Number keys with SHIFT for specific waves
+                    elif pygame.key.get_mods() & pygame.KMOD_SHIFT:
+                        if event.key == pygame.K_4:
+                            self.jump_to_wave(5)
+                        elif event.key == pygame.K_5:
+                            self.jump_to_wave(10)
+                        elif event.key == pygame.K_6:
+                            self.jump_to_wave(15)
+                        elif event.key == pygame.K_7:
+                            self.jump_to_wave(20)
+                        elif event.key == pygame.K_8:
+                            self.jump_to_wave(25)
+                        elif event.key == pygame.K_9:
+                            self.jump_to_wave(30)
+                        elif event.key == pygame.K_0:
+                            self.jump_to_wave(40)
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 if not self.paused:
                     mouse_pos = pygame.mouse.get_pos()
@@ -464,10 +465,17 @@ class GameScene(BaseScene):
             # Draw wave transition if needed
             self.game.hud.draw_wave_transition(screen)
             
-            # Draw debug controls help text
-            if config.get("debug.show_wave_controls", True):
+            # Draw Dev Mode indicator and controls help text
+            if self.game.settings.dev_mode:
                 small_font = self.game.assets.get_font('small')
-                debug_text = "Debug: PageUp/PageDown (change wave), Shift+4-9,0 (jump to waves 5-40)"
+                
+                # Dev Mode indicator
+                dev_text = "DEV MODE"
+                dev_surface = small_font.render(dev_text, True, (255, 100, 100))
+                screen.blit(dev_surface, (10, screen.get_height() - 50))
+                
+                # Wave controls help text
+                debug_text = "PageUp/Down: change wave | Shift+4-9,0: jump to waves 5-40 | F4: debug overlay"
                 text_surface = small_font.render(debug_text, True, (150, 150, 150))
                 screen.blit(text_surface, (10, screen.get_height() - 25))
         else:
