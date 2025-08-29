@@ -463,7 +463,26 @@ class FlairGame:
         # Create floor tile pattern if floor image exists
         if self.images['floor']:
             self.create_floor_pattern()
-    
+        
+        # Load drink icons (this block should be here, not inside the 'if' above!)
+        icon_files = {
+            'beer_icon': 'assets/images/beer_icon.png',
+            'wine_icon': 'assets/images/wine_icon.png',
+            'cocktail_icon': 'assets/images/cocktail_icon.png'
+            'heart_icon': 'assets/images/heart.png'
+        }
+        for icon_name, icon_path in icon_files.items():
+            if os.path.exists(icon_path):
+                try:
+                    icon_img = pygame.image.load(icon_path).convert_alpha()
+                    icon_img = pygame.transform.scale(icon_img, (32, 32))  # Scale as needed
+                    self.images[icon_name] = icon_img
+                    print(f"Loaded icon: {icon_path}")
+                except pygame.error as e:
+                    print(f"Could not load {icon_path}: {e}")
+            else:
+                self.images[icon_name] = None
+            
     def create_floor_pattern(self):
         """Create a repeating 2x2 pattern of the floor texture"""
         floor_image = self.images['floor']
@@ -1265,40 +1284,37 @@ class FlairGame:
             if customer.served:
                 # Use custom sprites for served customers
                 if customer.service_successful and self.images['happy_customer']:
-                    # Draw happy customer sprite
                     sprite = self.images['happy_customer']
                     sprite_rect = sprite.get_rect(center=(int(customer.x), int(customer.y)))
                     self.screen.blit(sprite, sprite_rect)
                 elif not customer.service_successful and self.images['unhappy_customer']:
-                    # Draw unhappy customer sprite
                     sprite = self.images['unhappy_customer']
                     sprite_rect = sprite.get_rect(center=(int(customer.x), int(customer.y)))
                     self.screen.blit(sprite, sprite_rect)
                 else:
-                    # Fallback to colored circles if sprites not available
                     color = COLORS['text_green'] if customer.service_successful else COLORS['text_red']
-                    pygame.draw.circle(
-                        self.screen, color,
-                        (int(customer.x), int(customer.y)), customer.size
-                    )
+                    pygame.draw.circle(self.screen, color, (int(customer.x), int(customer.y)), customer.size)
             else:
                 # Draw active customer as blue circle
-                pygame.draw.circle(
-                    self.screen, COLORS['customer'],
-                    (int(customer.x), int(customer.y)), customer.size
-                )
-                
-                # Draw drink request bubble
-                drink_color = self.get_drink_color(customer.drink_type)
-                pygame.draw.circle(
-                    self.screen, drink_color,
-                    (int(customer.x), int(customer.y - 35)), 15
-                )
-                pygame.draw.circle(
-                    self.screen, COLORS['text_white'],
-                    (int(customer.x), int(customer.y - 35)), 15, 2
-                )
-            
+                pygame.draw.circle(self.screen, COLORS['customer'], (int(customer.x), int(customer.y)), customer.size)
+
+                # Bobbing effect for drink icon above customer's head
+                bob_offset = 5 * math.sin(pygame.time.get_ticks() / 400 + customer.x)
+                icon_name = {
+                    DrinkType.BEER: 'beer_icon',
+                    DrinkType.WINE: 'wine_icon',
+                    DrinkType.COCKTAIL: 'cocktail_icon'
+                }[customer.drink_type]
+                icon_img = self.images.get(icon_name)
+                if icon_img:
+                    self.screen.blit(icon_img, (int(customer.x) - 16, int(customer.y - 35 + bob_offset) - 16))
+                else:
+                    # fallback: colored circle
+                    drink_color = self.get_drink_color(customer.drink_type)
+                    pygame.draw.circle(self.screen, drink_color, (int(customer.x), int(customer.y - 35 + bob_offset)), 15)
+                # Optionally: draw a white border around the bubble/icon for visual clarity
+                pygame.draw.circle(self.screen, COLORS['text_white'], (int(customer.x), int(customer.y - 35 + bob_offset)), 15, 2)
+
             # Draw dialogue
             if customer.dialogue and customer.dialogue_timer > 0:
                 dialogue_color = COLORS['text_green'] if customer.service_successful else COLORS['text_red']
@@ -1308,12 +1324,22 @@ class FlairGame:
     
     def draw_projectiles(self):
         for projectile in self.projectiles:
-            color = self.get_drink_color(projectile.drink_type)
-            pygame.draw.circle(
-                self.screen, color,
-                (int(projectile.x), int(projectile.y)), projectile.size
-            )
-    
+            icon_name = {
+                DrinkType.BEER: 'beer_icon',
+                DrinkType.WINE: 'wine_icon',
+                DrinkType.COCKTAIL: 'cocktail_icon'
+            }[projectile.drink_type]
+            icon_img = self.images.get(icon_name)
+            if icon_img:
+                # Spinning animation
+                angle = (pygame.time.get_ticks() * 0.5 + projectile.x * 2) % 360
+                rotated_icon = pygame.transform.rotate(icon_img, angle)
+                rect = rotated_icon.get_rect(center=(int(projectile.x), int(projectile.y)))
+                self.screen.blit(rotated_icon, rect.topleft)
+            else:
+                color = self.get_drink_color(projectile.drink_type)
+                pygame.draw.circle(self.screen, color, (int(projectile.x), int(projectile.y)), projectile.size)
+        
     def draw_particles(self):
         for particle in self.particles:
             alpha = int(255 * (particle.life / particle.max_life))
@@ -1330,50 +1356,65 @@ class FlairGame:
             )
     
     def draw_game_ui(self):
-        # Game title
-        title_surface = self.large_font.render("🍺 Flair! 🍺", True, COLORS['text_gold'])
+        # --- Title with beer icons ---
+        title_surface = self.large_font.render("Flair!", True, COLORS['text_gold'])
         title_rect = title_surface.get_rect(center=(SCREEN_WIDTH // 2, 30))
         self.screen.blit(title_surface, title_rect)
-        
-        # Stats
+        beer_icon = self.images.get('beer_icon')
+        if beer_icon:
+            self.screen.blit(beer_icon, (title_rect.left - 40, title_rect.centery - 16))
+            self.screen.blit(beer_icon, (title_rect.right + 8, title_rect.centery - 16))
+
+        # --- Stats Bar ---
         stats_x = 50
         stats_y = 60
-        stats = [
-            f"Score: {self.score}",
-            f"Wave: {self.wave}",
-            f"Lives: {'❤️' * self.lives}",
-            f"Served: {self.customers_served}"
-        ]
-        
-        for i, stat in enumerate(stats):
-            stat_surface = self.small_font.render(stat, True, COLORS['text_white'])
-            self.screen.blit(stat_surface, (stats_x + i * 160, stats_y))
-        
-        # Inventory
-        inv_x = SCREEN_WIDTH - 300
+        # Score
+        score_surface = self.small_font.render(f"Score: {self.score}", True, COLORS['text_white'])
+        self.screen.blit(score_surface, (stats_x, stats_y))
+        # Wave
+        wave_surface = self.small_font.render(f"Wave: {self.wave}", True, COLORS['text_white'])
+        self.screen.blit(wave_surface, (stats_x + 160, stats_y))
+        # Served
+        served_surface = self.small_font.render(f"Served: {self.customers_served}", True, COLORS['text_white'])
+        self.screen.blit(served_surface, (stats_x + 320, stats_y))
+        # Lives (show heart icons)
+        lives_surface = self.small_font.render("Lives:", True, COLORS['text_white'])
+        self.screen.blit(lives_surface, (stats_x + 480, stats_y))
+        heart_icon = self.images.get('heart_icon')
+        for i in range(self.lives):
+            if heart_icon:
+                self.screen.blit(heart_icon, (stats_x + 550 + i*34, stats_y))
+            else:
+                heart_surface = self.small_font.render("❤️", True, COLORS['text_red'])
+                self.screen.blit(heart_surface, (stats_x + 550 + i*34, stats_y))
+
+        # --- Inventory (top right, spaced and iconified) ---
+        inv_x = SCREEN_WIDTH - 320
         inv_y = 50
-        
         drink_types = [DrinkType.BEER, DrinkType.WINE, DrinkType.COCKTAIL]
         drink_keys = ['1', '2', '3']
-        
-        for i, (drink_type, key) in enumerate(zip(drink_types, drink_keys)):
-            x = inv_x + i * 120
-            
-            color = self.get_drink_color(drink_type)
+        icon_names = ['beer_icon', 'wine_icon', 'cocktail_icon']
+        for i, (drink_type, key, icon_name) in enumerate(zip(drink_types, drink_keys, icon_names)):
+            x = inv_x + i * 90
+            # Gold ring for selected drink
             if drink_type == self.selected_drink:
                 pygame.draw.circle(self.screen, COLORS['text_gold'], (x, inv_y), 22, 3)
-            pygame.draw.circle(self.screen, color, (x, inv_y), 18)
-            
-            count = self.inventory[drink_type]
-            count_surface = self.small_font.render(str(count), True, COLORS['text_white'])
+            icon_img = self.images.get(icon_name)
+            if icon_img:
+                self.screen.blit(icon_img, (x - 16, inv_y - 16))
+            else:
+                color = self.get_drink_color(drink_type)
+                pygame.draw.circle(self.screen, color, (x, inv_y), 18)
+            # Drink count
+            count_surface = self.small_font.render(str(self.inventory[drink_type]), True, COLORS['text_white'])
             count_rect = count_surface.get_rect(center=(x, inv_y + 30))
             self.screen.blit(count_surface, count_rect)
-            
+            # Key label
             key_surface = self.small_font.render(f"({key})", True, COLORS['text_gold'])
             key_rect = key_surface.get_rect(center=(x, inv_y + 50))
             self.screen.blit(key_surface, key_rect)
-        
-        # Controls
+
+        # --- Controls (bottom, spaced out) ---
         controls_y = SCREEN_HEIGHT - 60
         controls = [
             "1/2/3: Select drinks",
@@ -1381,34 +1422,31 @@ class FlairGame:
             "R: Restock",
             "P: Pause | ESC: Menu"
         ]
-        
         for i, control in enumerate(controls):
             control_surface = self.small_font.render(control, True, COLORS['text_white'])
-            self.screen.blit(control_surface, (50 + i * 250, controls_y))
-        
-        # Wave info
+            self.screen.blit(control_surface, (60 + i * 270, controls_y))
+
+        # --- Wave info (bottom center) ---
         wave_info = f"Wave {self.wave} - {self.customers_in_wave}/{self.wave_size} spawned"
         wave_surface = self.font.render(wave_info, True, COLORS['text_gold'])
         wave_rect = wave_surface.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT - 30))
         self.screen.blit(wave_surface, wave_rect)
-        
-        # Restock overlay
+
+        # --- Restock overlay ---
         if self.is_restocking:
             overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
             overlay.fill((0, 0, 0, 128))
             self.screen.blit(overlay, (0, 0))
-            
             restock_text = "RESTOCKING..."
             restock_surface = self.large_font.render(restock_text, True, COLORS['text_gold'])
             restock_rect = restock_surface.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
             self.screen.blit(restock_surface, restock_rect)
-            
             time_text = f"{self.restock_timer // 60 + 1} seconds remaining"
             time_surface = self.font.render(time_text, True, COLORS['text_white'])
             time_rect = time_surface.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50))
             self.screen.blit(time_surface, time_rect)
-        
-        # Pause overlay
+
+        # --- Pause overlay ---
         if self.paused:
             pause_surface = self.large_font.render("PAUSED - Press P to continue", True, COLORS['text_gold'])
             pause_rect = pause_surface.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
