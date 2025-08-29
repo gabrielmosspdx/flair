@@ -49,3 +49,5 @@ coverage.xml
 
 # UV
 .python-version
+
+logs

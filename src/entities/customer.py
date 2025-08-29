@@ -1,8 +1,7 @@
 """Customer entity for the Flair game."""
 
-import math
 import random
-from typing import Optional, Tuple
+from typing import Optional
 
 import pygame
 
@@ -20,7 +19,7 @@ class Customer(pygame.sprite.Sprite):
         target_y: float,
         drink_type: DrinkType,
         base_speed: float = 0.5
-    ):
+    ) -> None:
         """Initialize a customer.
         
         Args:
@@ -33,43 +32,58 @@ class Customer(pygame.sprite.Sprite):
         """
         super().__init__()
         
-        self.x = spawn_x
-        self.y = spawn_y
-        self.target_x = target_x
-        self.target_y = target_y
-        self.drink_type = drink_type
-        self.speed = base_speed
-        self.size = 20
-        self.served = False
-        self.service_successful = False
-        self.dialogue = ""
-        self.dialogue_timer = 0
+        # Use Vector2 for better position/velocity handling
+        self.position = pygame.math.Vector2(spawn_x, spawn_y)
+        self.target = pygame.math.Vector2(target_x, target_y)
+        self.velocity = pygame.math.Vector2(0, 0)
         
-        # Calculate movement vector
-        dx = target_x - spawn_x
-        dy = target_y - spawn_y
-        distance = math.sqrt(dx * dx + dy * dy)
+        self.drink_type: DrinkType = drink_type
+        self.speed: float = base_speed
+        self.size: int = 20
+        self.served: bool = False
+        self.service_successful: bool = False
+        self.dialogue: str = ""
+        self.dialogue_timer: int = 0
         
-        if distance > 0:
-            self.vx = (dx / distance) * self.speed
-            self.vy = (dy / distance) * self.speed
-        else:
-            self.vx = self.vy = 0
+        # Calculate movement vector using Vector2
+        direction = self.target - self.position
+        if direction.length() > 0:
+            direction.normalize_ip()
+            self.velocity = direction * self.speed
         
         # Create rect for collision detection
         self.rect = pygame.Rect(
-            self.x - self.size,
-            self.y - self.size,
+            self.position.x - self.size,
+            self.position.y - self.size,
             self.size * 2,
             self.size * 2
         )
     
+    @property
+    def x(self) -> float:
+        """Get X position."""
+        return self.position.x
+    
+    @x.setter
+    def x(self, value: float) -> None:
+        """Set X position."""
+        self.position.x = value
+    
+    @property
+    def y(self) -> float:
+        """Get Y position."""
+        return self.position.y
+    
+    @y.setter
+    def y(self, value: float) -> None:
+        """Set Y position."""
+        self.position.y = value
+    
     def update(self) -> None:
         """Update customer position and state."""
         if not self.served:
-            self.x += self.vx
-            self.y += self.vy
-            self.rect.center = (int(self.x), int(self.y))
+            self.position += self.velocity
+            self.rect.center = (int(self.position.x), int(self.position.y))
         
         if self.dialogue_timer > 0:
             self.dialogue_timer -= 1
@@ -80,9 +94,7 @@ class Customer(pygame.sprite.Sprite):
         Returns:
             Distance in pixels
         """
-        dx = self.x - self.target_x
-        dy = self.y - self.target_y
-        return math.sqrt(dx * dx + dy * dy)
+        return self.position.distance_to(self.target)
     
     def set_served(self, dialogue: Optional[str] = None, successful: bool = True) -> None:
         """Mark customer as served.

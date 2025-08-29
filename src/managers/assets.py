@@ -78,7 +78,13 @@ class AssetManager:
         for path in paths:
             if os.path.exists(path):
                 try:
-                    image = pygame.image.load(path).convert_alpha()
+                    image = pygame.image.load(path)
+                    
+                    # Use convert_alpha for images with transparency, convert for others
+                    if image.get_alpha() or 'icon' in filename.lower() or 'customer' in filename.lower():
+                        image = image.convert_alpha()
+                    else:
+                        image = image.convert()
                     
                     # Scale customer sprites
                     if 'customer' in filename:

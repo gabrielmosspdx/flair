@@ -11,9 +11,13 @@ In Flair!, you play as a bartender who must quickly serve the correct drinks to 
 - **Fast-paced arcade action** - Customers approach from all directions with increasing speed
 - **Three drink types** - Beer, Wine, and Cocktails to match customer preferences  
 - **Wave-based gameplay** - Survive increasingly difficult waves of thirsty customers
-- **High score system** - Compete for the top spot on the leaderboard
+- **High score system** - Compete for the top spot on the leaderboard with persistent saves
 - **Controller support** - Play with keyboard/mouse or gamepad
 - **Customizable settings** - Adjust audio levels and controls to your preference
+- **Debug mode** - Press F3 to see FPS and performance metrics
+- **Quick save** - Press F5 to save your progress instantly
+- **Scene-based architecture** - Clean separation of menu, game, and settings screens
+- **HUD animations** - Visual feedback for scores, lives, and wave transitions
 
 ## 🚀 Installation
 
@@ -73,6 +77,8 @@ python src/main.py
 - **Mouse Click** - Throw selected drink at cursor position
 - **R** - Restock all drinks
 - **P** - Pause game
+- **F3** - Toggle debug overlay
+- **F5** - Quick save
 - **ESC** - Return to main menu
 
 #### Controller (Xbox layout)
@@ -98,21 +104,25 @@ The project follows Pygame best practices with a modular architecture:
 
 ```
 flair/
-├── src/                   # Source code
-│   ├── entities/         # Game objects (Customer, Projectile, Particle)
-│   ├── managers/         # Resource managers (Audio, Assets, Settings)
-│   ├── ui/              # UI components (Button, Slider)
-│   ├── utils/           # Constants and helpers
-│   └── main.py          # Entry point
-├── assets/              # Game resources
-│   ├── fonts/          # Font files
-│   ├── images/         # Sprites and textures
-│   ├── sounds/         # Sound effects
-│   └── music/          # Background music
-├── data/               # Game data
-│   ├── settings.json   # User settings
-│   └── highscores.json # High score records
-└── flair.py           # Original game file (legacy)
+├── src/                     # Source code
+│   ├── entities/           # Game objects (Customer, Projectile, Particle)
+│   ├── managers/           # Resource managers (Audio, Assets, Input, Settings)
+│   ├── scenes/             # Game scenes (Menu, Game, Settings, GameOver)
+│   ├── ui/                 # UI components (Button, Slider, HUD)
+│   ├── utils/              # Utilities (Config, Logger, Debug, SaveSystem)
+│   ├── game.py             # Main game class
+│   └── main.py             # Entry point
+├── assets/                 # Game resources
+│   ├── fonts/              # Font files
+│   ├── images/             # Sprites and textures
+│   ├── sounds/             # Sound effects
+│   └── music/              # Background music
+├── data/                   # Configuration and saves
+│   ├── game_config.json    # Game configuration
+│   └── settings.json       # User settings
+├── saves/                  # Save files and high scores (auto-created)
+├── logs/                   # Game logs (auto-created)
+└── tests/                  # Unit tests
 ```
 
 ### Architecture Highlights
