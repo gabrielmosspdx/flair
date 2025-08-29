@@ -374,13 +374,21 @@ class FlairGame:
             "Locally sourced!",
             "Artisanal!",
             "Small batch!",
-            "Craft AF!"
+            "Craft AF!",
+            "This would be good out of a shoe!",
+            "Show me the way!"
         ]
         
         self.negative_dialogue = [
             "Not what I ordered!",
             "This isn't right!",
-            "Wrong drink, dude!"
+            "O...kay.",
+            "Kay.",
+            "Mkay.",
+            "Don't quit your day job!",
+            "Uh yeah. Hmm. Great.",
+            "Rubbish!",
+            "Bye Felicia!"
         ]
     
     def load_fonts(self):
@@ -522,7 +530,7 @@ class FlairGame:
         button_height = 55
         center_x = SCREEN_WIDTH // 2 - button_width // 2
         start_y = 350
-        spacing = 75
+        spacing = 90
         
         self.main_menu_buttons = [
             Button(center_x, start_y, button_width, button_height, "New Game", self.font, self.start_new_game),
@@ -1339,7 +1347,7 @@ class FlairGame:
         
         for i, stat in enumerate(stats):
             stat_surface = self.small_font.render(stat, True, COLORS['text_white'])
-            self.screen.blit(stat_surface, (stats_x + i * 120, stats_y))
+            self.screen.blit(stat_surface, (stats_x + i * 160, stats_y))
         
         # Inventory
         inv_x = SCREEN_WIDTH - 300
@@ -1349,7 +1357,7 @@ class FlairGame:
         drink_keys = ['1', '2', '3']
         
         for i, (drink_type, key) in enumerate(zip(drink_types, drink_keys)):
-            x = inv_x + i * 80
+            x = inv_x + i * 120
             
             color = self.get_drink_color(drink_type)
             if drink_type == self.selected_drink:
@@ -1376,7 +1384,7 @@ class FlairGame:
         
         for i, control in enumerate(controls):
             control_surface = self.small_font.render(control, True, COLORS['text_white'])
-            self.screen.blit(control_surface, (50 + i * 200, controls_y))
+            self.screen.blit(control_surface, (50 + i * 250, controls_y))
         
         # Wave info
         wave_info = f"Wave {self.wave} - {self.customers_in_wave}/{self.wave_size} spawned"
@@ -1448,4 +1456,5 @@ class FlairGame:
 
 if __name__ == "__main__":
     game = FlairGame()
+
     game.run()
