@@ -17,12 +17,8 @@ def main():
     try:
         # Setup logging (always enabled)
         log_level = config.get("debug.log_level", "INFO")
-        game_logger.setup_logger(
-            name='Flair',
-            log_level=log_level,
-            log_to_file=True
-        )
-        
+        game_logger.setup_logger(name="Flair", log_level=log_level, log_to_file=True)
+
         game_logger.info("=" * 50)
         game_logger.info("Starting Flair")
         game_logger.info("=" * 50)
@@ -35,11 +31,11 @@ def main():
         game_logger.info("- Debug overlay (F3)")
         game_logger.info("- Quick save (F5)")
         game_logger.info("=" * 50)
-        
+
         # Create and run the integrated game
         game = FlairGame()
         game.run()
-        
+
     except KeyboardInterrupt:
         game_logger.info("Game interrupted by user")
         print("\nGame interrupted by user")
@@ -47,6 +43,7 @@ def main():
         game_logger.exception(f"Fatal error occurred: {e}")
         print(f"An error occurred: {e}")
         import traceback
+
         traceback.print_exc()
     finally:
         game_logger.info("Game shutdown complete")

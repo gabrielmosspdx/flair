@@ -10,28 +10,29 @@ FPS = 60
 
 # Colors (RGB tuples)
 COLORS = {
-    'bg': (44, 24, 16),
-    'bar': (139, 69, 19),
-    'bar_top': (160, 82, 45),
-    'customer': (65, 105, 225),
-    'customer_served': (136, 136, 136),
-    'crosshair': (255, 215, 0),
-    'text_white': (255, 255, 255),
-    'text_gold': (255, 215, 0),
-    'text_green': (0, 255, 0),
-    'text_red': (255, 0, 0),
-    'text_gray': (128, 128, 128),
-    'ui_bg': (139, 69, 19, 80),
-    'ui_border': (139, 69, 19),
-    'menu_bg': (32, 20, 12),
-    'button_bg': (139, 69, 19),
-    'button_hover': (160, 82, 45),
-    'button_pressed': (110, 55, 15),
-    'beer': (218, 165, 32),
-    'wine': (114, 47, 55),
-    'cocktail': (255, 99, 71),
-    'particle_splat': (255, 0, 0)
+    "bg": (44, 24, 16),
+    "bar": (139, 69, 19),
+    "bar_top": (160, 82, 45),
+    "customer": (65, 105, 225),
+    "customer_served": (136, 136, 136),
+    "crosshair": (255, 215, 0),
+    "text_white": (255, 255, 255),
+    "text_gold": (255, 215, 0),
+    "text_green": (0, 255, 0),
+    "text_red": (255, 0, 0),
+    "text_gray": (128, 128, 128),
+    "ui_bg": (139, 69, 19, 80),
+    "ui_border": (139, 69, 19),
+    "menu_bg": (32, 20, 12),
+    "button_bg": (139, 69, 19),
+    "button_hover": (160, 82, 45),
+    "button_pressed": (110, 55, 15),
+    "beer": (218, 165, 32),
+    "wine": (114, 47, 55),
+    "cocktail": (255, 99, 71),
+    "particle_splat": (255, 0, 0),
 }
+
 
 # Game states
 class GameState(Enum):
@@ -42,11 +43,13 @@ class GameState(Enum):
     LEADERBOARD = 4
     CONTROLLER_SETUP = 5
 
+
 # Drink types
 class DrinkType(Enum):
     BEER = 0
     WINE = 1
     COCKTAIL = 2
+
 
 # Game mechanics
 INITIAL_LIVES = 3
@@ -77,14 +80,14 @@ SLIDER_HEIGHT = 20
 # Controller defaults
 DEFAULT_CONTROLLER_DEADZONE = 0.3
 DEFAULT_CONTROLLER_MAPPINGS = {
-    'select_beer': 0,      # A button
-    'select_wine': 1,      # B button  
-    'select_cocktail': 2,  # X button
-    'restock': 3,          # Y button
-    'pause': 7,            # Start button
-    'throw_axis_x': 0,     # Left stick X
-    'throw_axis_y': 1,     # Left stick Y
-    'throw_button': 5      # Right bumper
+    "select_beer": 0,  # A button
+    "select_wine": 1,  # B button
+    "select_cocktail": 2,  # X button
+    "restock": 3,  # Y button
+    "pause": 7,  # Start button
+    "throw_axis_x": 0,  # Left stick X
+    "throw_axis_y": 1,  # Left stick Y
+    "throw_button": 5,  # Right bumper
 }
 
 # Audio
@@ -103,7 +106,7 @@ POSITIVE_DIALOGUE = [
     "Small batch!",
     "Craft AF!",
     "This would be good out of a shoe!",
-    "Show me the way!"
+    "Show me the way!",
 ]
 
 NEGATIVE_DIALOGUE = [
@@ -115,7 +118,7 @@ NEGATIVE_DIALOGUE = [
     "Don't quit your day job!",
     "Uh yeah. Hmm. Great.",
     "Rubbish!",
-    "Bye Felicia!"
+    "Bye Felicia!",
 ]
 
 # File paths

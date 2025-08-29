@@ -8,24 +8,24 @@ from pathlib import Path
 
 class Config:
     """Manages game configuration from JSON files."""
-    
-    _instance: Optional['Config'] = None
+
+    _instance: Optional["Config"] = None
     _config: Dict[str, Any] = {}
-    
-    def __new__(cls) -> 'Config':
+
+    def __new__(cls) -> "Config":
         """Singleton pattern implementation."""
         if cls._instance is None:
             cls._instance = super().__new__(cls)
         return cls._instance
-    
+
     def __init__(self):
         """Initialize configuration."""
         if not self._config:
             self.load_config()
-    
+
     def load_config(self, config_path: str = "data/game_config.json") -> None:
         """Load configuration from JSON file.
-        
+
         Args:
             config_path: Path to configuration file
         """
@@ -35,8 +35,8 @@ class Config:
                 # Try relative to script location
                 script_dir = Path(__file__).parent.parent.parent
                 full_path = script_dir / config_path
-                
-            with open(full_path, 'r') as f:
+
+            with open(full_path, "r") as f:
                 self._config = json.load(f)
                 print(f"Loaded configuration from {full_path}")
         except FileNotFoundError:
@@ -45,7 +45,7 @@ class Config:
         except json.JSONDecodeError as e:
             print(f"Error parsing config file: {e}, using defaults")
             self._set_defaults()
-    
+
     def _set_defaults(self) -> None:
         """Set default configuration values."""
         self._config = {
@@ -61,90 +61,77 @@ class Config:
                 "base_points": 10,
                 "points_per_wave": 2,
                 "wave_speed_multiplier": 1.05,
-                "min_customer_spawn_distance": 90
+                "min_customer_spawn_distance": 90,
             },
-            "display": {
-                "screen_width": 1200,
-                "screen_height": 800,
-                "fps": 60
-            },
-            "audio": {
-                "default_sound_volume": 0.7,
-                "default_music_volume": 0.3
-            },
-            "debug": {
-                "show_collision_boxes": False
-            },
-            "physics": {
-                "customer_reach_threshold": 30
-            },
-            "ui": {
-                "bar_size": 60
-            }
+            "display": {"screen_width": 1200, "screen_height": 800, "fps": 60},
+            "audio": {"default_sound_volume": 0.7, "default_music_volume": 0.3},
+            "debug": {"show_collision_boxes": False},
+            "physics": {"customer_reach_threshold": 30},
+            "ui": {"bar_size": 60},
         }
-    
+
     def get(self, key: str, default: Any = None) -> Any:
         """Get configuration value using dot notation.
-        
+
         Args:
             key: Configuration key (e.g., "game.initial_lives")
             default: Default value if key not found
-            
+
         Returns:
             Configuration value or default
         """
-        keys = key.split('.')
+        keys = key.split(".")
         value = self._config
-        
+
         for k in keys:
             if isinstance(value, dict) and k in value:
                 value = value[k]
             else:
                 return default
-                
+
         return value
-    
+
     def set(self, key: str, value: Any) -> None:
         """Set configuration value using dot notation.
-        
+
         Args:
             key: Configuration key (e.g., "game.initial_lives")
             value: Value to set
         """
-        keys = key.split('.')
+        keys = key.split(".")
         config = self._config
-        
+
         for k in keys[:-1]:
             if k not in config:
                 config[k] = {}
             config = config[k]
-            
+
         config[keys[-1]] = value
-    
+
     def save(self, config_path: str = "data/game_config.json") -> None:
         """Save configuration to JSON file.
-        
+
         Args:
             config_path: Path to save configuration
         """
         try:
             full_path = Path(config_path)
             full_path.parent.mkdir(parents=True, exist_ok=True)
-            
-            with open(full_path, 'w') as f:
+
+            with open(full_path, "w") as f:
                 json.dump(self._config, f, indent=4)
                 print(f"Saved configuration to {full_path}")
         except Exception as e:
             print(f"Error saving config: {e}")
-    
+
     def reload(self) -> None:
         """Reload configuration from file."""
         self.load_config()
-    
+
     @property
     def data(self) -> Dict[str, Any]:
         """Get full configuration dictionary.
-        
+
         Returns:
             Configuration dictionary
         """
