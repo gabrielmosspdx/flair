@@ -84,17 +84,17 @@ class SettingsScene(BaseScene):
         # Game difficulty and balance settings
         self.sliders["Gameplay"]["initial_lives"] = Slider(
             350, y_start, 250, 1, 10,
-            config.get("game.initial_lives", 3), "Initial Lives"
+            config.get("game.initial_lives", 3), "Initial Lives", integer_only=True
         )
         
         self.sliders["Gameplay"]["initial_inventory"] = Slider(
             350, y_start + y_spacing, 250, 1, 20,
-            config.get("game.initial_inventory", 5), "Initial Inventory"
+            config.get("game.initial_inventory", 5), "Initial Inventory", integer_only=True
         )
         
         self.sliders["Gameplay"]["base_spawn_delay"] = Slider(
             350, y_start + y_spacing * 2, 250, 30, 240,
-            config.get("game.base_spawn_delay", 120), "Base Spawn Delay"
+            config.get("game.base_spawn_delay", 120), "Base Spawn Delay", integer_only=True
         )
         
         self.sliders["Gameplay"]["base_customer_speed"] = Slider(
@@ -104,12 +104,12 @@ class SettingsScene(BaseScene):
         
         self.sliders["Gameplay"]["initial_wave_size"] = Slider(
             350, y_start + y_spacing * 4, 250, 4, 20,
-            config.get("game.initial_wave_size", 8), "Initial Wave Size"
+            config.get("game.initial_wave_size", 8), "Initial Wave Size", integer_only=True
         )
         
         self.sliders["Gameplay"]["max_wave_size"] = Slider(
             350, y_start + y_spacing * 5, 250, 10, 50,
-            config.get("game.max_wave_size", 20), "Max Wave Size"
+            config.get("game.max_wave_size", 20), "Max Wave Size", integer_only=True
         )
         
         self.sliders["Gameplay"]["wave_speed_multiplier"] = Slider(
@@ -119,12 +119,12 @@ class SettingsScene(BaseScene):
         
         self.sliders["Gameplay"]["min_customer_spawn_distance"] = Slider(
             350, y_start + y_spacing * 7, 250, 50, 150,
-            config.get("game.min_customer_spawn_distance", 90), "Min Spawn Distance"
+            config.get("game.min_customer_spawn_distance", 90), "Min Spawn Distance", integer_only=True
         )
         
         self.sliders["Gameplay"]["base_points"] = Slider(
             350, y_start + y_spacing * 8, 250, 5, 50,
-            config.get("game.base_points", 10), "Base Points"
+            config.get("game.base_points", 10), "Base Points", integer_only=True
         )
     
     def setup_display_tab(self):
@@ -134,12 +134,12 @@ class SettingsScene(BaseScene):
         
         self.sliders["Display"]["fps"] = Slider(
             350, y_start, 250, 30, 144,
-            config.get("display.fps", 60), "Display FPS"
+            config.get("display.fps", 60), "Display FPS", integer_only=True
         )
         
         self.sliders["Display"]["bar_size"] = Slider(
             350, y_start + y_spacing, 250, 40, 100,
-            config.get("ui.bar_size", 60), "Bar Size"
+            config.get("ui.bar_size", 60), "Bar Size", integer_only=True
         )
     
     def setup_audio_tab(self):
@@ -184,13 +184,8 @@ class SettingsScene(BaseScene):
         # Apply Gameplay settings
         for key, slider in self.sliders["Gameplay"].items():
             old_value = config.get(f"game.{key}")
-            if key in ["initial_lives", "initial_inventory", "base_spawn_delay", 
-                      "initial_wave_size", "max_wave_size", "base_points"]:
-                new_value = int(slider.get_value())
-                config.set(f"game.{key}", new_value)
-            else:
-                new_value = slider.get_value()
-                config.set(f"game.{key}", new_value)
+            new_value = slider.get_value()
+            config.set(f"game.{key}", new_value)
             
             # Check if this setting needs a new game
             if key in ["initial_lives", "initial_inventory", "initial_wave_size"] and old_value != new_value:
@@ -198,9 +193,9 @@ class SettingsScene(BaseScene):
         
         # Apply Display settings
         old_fps = config.get("display.fps")
-        new_fps = int(self.sliders["Display"]["fps"].get_value())
+        new_fps = self.sliders["Display"]["fps"].get_value()
         config.set("display.fps", new_fps)
-        config.set("ui.bar_size", int(self.sliders["Display"]["bar_size"].get_value()))
+        config.set("ui.bar_size", self.sliders["Display"]["bar_size"].get_value())
         
         # Update FPS immediately if changed
         if old_fps != new_fps:

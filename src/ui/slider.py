@@ -18,7 +18,8 @@ class Slider:
         min_val: float,
         max_val: float,
         initial_val: float,
-        label: str
+        label: str,
+        integer_only: bool = False
     ):
         """Initialize a slider.
         
@@ -30,11 +31,13 @@ class Slider:
             max_val: Maximum value
             initial_val: Initial value
             label: Label text
+            integer_only: If True, slider will only return integer values
         """
         self.rect = pygame.Rect(x, y, width, 20)
         self.min_val = min_val
         self.max_val = max_val
-        self.val = initial_val
+        self.integer_only = integer_only
+        self.val = int(initial_val) if integer_only else initial_val
         self.label = label
         self.dragging = False
         
@@ -72,13 +75,15 @@ class Slider:
         if self.dragging:
             rel_x = max(0, min(self.rect.width, mouse_pos[0] - self.rect.x))
             self.handle_pos = self.rect.x + rel_x
-            self.val = self.min_val + (rel_x / self.rect.width) * (self.max_val - self.min_val)
+            new_val = self.min_val + (rel_x / self.rect.width) * (self.max_val - self.min_val)
+            self.val = round(new_val) if self.integer_only else new_val
         
         # Allow clicking on track to jump to position
         elif mouse_clicked and self.rect.collidepoint(mouse_pos):
             rel_x = max(0, min(self.rect.width, mouse_pos[0] - self.rect.x))
             self.handle_pos = self.rect.x + rel_x
-            self.val = self.min_val + (rel_x / self.rect.width) * (self.max_val - self.min_val)
+            new_val = self.min_val + (rel_x / self.rect.width) * (self.max_val - self.min_val)
+            self.val = round(new_val) if self.integer_only else new_val
         
         # Update handle rect position
         self.handle_rect.x = self.handle_pos - 10
@@ -107,7 +112,10 @@ class Slider:
         pygame.draw.rect(screen, COLORS['text_gold'], self.handle_rect, 2)
         
         # Draw label and value
-        label_text = f"{self.label}: {self.val:.2f}"
+        if self.integer_only:
+            label_text = f"{self.label}: {int(self.val)}"
+        else:
+            label_text = f"{self.label}: {self.val:.2f}"
         text_surface = font.render(label_text, True, COLORS['text_white'])
         screen.blit(text_surface, (self.rect.x, self.rect.y - 25))
     
@@ -125,7 +133,8 @@ class Slider:
         Args:
             value: New value (will be clamped to min/max)
         """
-        self.val = max(self.min_val, min(self.max_val, value))
+        clamped_val = max(self.min_val, min(self.max_val, value))
+        self.val = round(clamped_val) if self.integer_only else clamped_val
         # Update handle position
         rel_pos = (self.val - self.min_val) / (self.max_val - self.min_val)
         self.handle_pos = self.rect.x + int(rel_pos * self.rect.width)
