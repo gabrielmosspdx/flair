@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.9', '3.10', '3.11', '3.12']
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v6
+      with:
+        enable-cache: true
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y python3-pygame libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev
+
+    - name: Install project dependencies with uv
+      run: |
+        uv sync --all-extras --dev
+
+    - name: Lint with flake8
+      run: |
+        uv run -- flake8 src/ tests/ --max-line-length=100 --extend-ignore=E203 --count --show-source --statistics
+
+    - name: Check import sorting with isort
+      run: |
+        uv run -- isort --check-only src/ tests/ --profile black --line-length 100
+
+    - name: Format check with Black
+      run: |
+        uv run -- black --check src/ tests/
+
+    - name: Type check with mypy
+      run: |
+        uv run -- mypy src/
+
+    - name: Run tests with pytest
+      run: |
+        uv run -- pytest tests/ --cov=src --cov-report=term-missing --cov-report=xml
+
+    - name: Upload coverage reports
+      if: matrix.python-version == '3.11'
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
