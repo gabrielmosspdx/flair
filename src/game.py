@@ -1,6 +1,5 @@
 """Fully integrated game with all refactored systems properly connected (no nested classes)."""
 
-
 import pygame
 
 from .managers import AssetManager, AudioManager, Settings
