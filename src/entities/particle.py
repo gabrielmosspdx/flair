@@ -1,7 +1,7 @@
 """Particle effects for the Flair game."""
 
 import random
-from typing import Tuple
+from typing import Tuple, Any
 
 import pygame
 
@@ -34,12 +34,8 @@ class Particle(pygame.sprite.Sprite):
         self.image = pygame.Surface((self.size * 2, self.size * 2), pygame.SRCALPHA)
         self.rect = self.image.get_rect(center=(int(x), int(y)))
 
-    def update(self) -> bool:
-        """Update particle position and life.
-
-        Returns:
-            True if particle is still alive, False if it should be removed
-        """
+    def update(self, *args: Any, **kwargs: Any) -> None:
+        """Update particle position and life."""
         self.x += self.vx
         self.y += self.vy
         self.vx *= 0.95  # Apply friction
@@ -57,7 +53,8 @@ class Particle(pygame.sprite.Sprite):
         self.image.fill((0, 0, 0, 0))  # Clear
         pygame.draw.circle(self.image, color_with_alpha, (self.size, self.size), self.size)
 
-        return self.life > 0
+        if self.life <= 0:
+            self.kill()
 
 
 class ParticleSystem:

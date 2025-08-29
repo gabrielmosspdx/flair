@@ -53,3 +53,5 @@ coverage.xml
 logs
 saves/*.json
 data/*.json
+
+.mypy_cache/

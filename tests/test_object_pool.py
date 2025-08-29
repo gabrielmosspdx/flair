@@ -10,7 +10,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from src.utils.object_pool import ObjectPool
 
 
-class TestObject:
+class MockObject:
     """Simple test object for pooling."""
     
     def __init__(self):
@@ -29,7 +29,7 @@ class TestObjectPool(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures."""
         self.pool = ObjectPool(
-            factory=TestObject,
+            factory=MockObject,
             reset_func=lambda obj: obj.reset(),
             initial_size=5,
             max_size=10
@@ -43,7 +43,7 @@ class TestObjectPool(unittest.TestCase):
     def test_acquire_object(self):
         """Test acquiring objects from pool."""
         obj = self.pool.acquire()
-        self.assertIsInstance(obj, TestObject)
+        self.assertIsInstance(obj, MockObject)
         self.assertEqual(self.pool.available_count, 4)
         self.assertEqual(len(self.pool.in_use), 1)
     
@@ -68,7 +68,7 @@ class TestObjectPool(unittest.TestCase):
         
         # Should create new object
         new_obj = self.pool.acquire()
-        self.assertIsInstance(new_obj, TestObject)
+        self.assertIsInstance(new_obj, MockObject)
         self.assertEqual(len(self.pool.in_use), 6)
     
     def test_max_pool_size(self):

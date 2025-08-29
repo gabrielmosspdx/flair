@@ -1,7 +1,7 @@
 """Projectile entity for the Flair game."""
 
 import math
-from typing import Tuple
+from typing import Tuple, Any
 
 import pygame
 
@@ -58,12 +58,8 @@ class Projectile(pygame.sprite.Sprite):
         # For sprite rotation
         self.angle = 0
 
-    def update(self) -> bool:
-        """Update projectile position.
-
-        Returns:
-            True if projectile is still alive, False if it should be removed
-        """
+    def update(self, *args: Any, **kwargs: Any) -> None:
+        """Update projectile position."""
         self.x += self.vx
         self.y += self.vy
         self.rect.center = (int(self.x), int(self.y))
@@ -72,7 +68,8 @@ class Projectile(pygame.sprite.Sprite):
         self.angle = (self.angle + 10) % 360
 
         self.life -= 1
-        return self.life > 0
+        if self.life <= 0:
+            self.kill()
 
     def check_collision(self, target_rect: pygame.Rect) -> bool:
         """Check collision with a target.

@@ -4,7 +4,7 @@ import json
 import os
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List, cast
 from ..utils.logger import game_logger
 
 
@@ -76,7 +76,7 @@ class SaveSystem:
                 save_data = json.load(f)
 
             game_logger.info(f"Game loaded from slot: {slot}")
-            return save_data.get("state")
+            return cast(Optional[Dict[str, Any]], save_data.get("state"))
 
         except Exception as e:
             game_logger.error(f"Failed to load game: {e}")
@@ -179,7 +179,7 @@ class SaveSystem:
 
         return position
 
-    def load_highscores(self) -> list:
+    def load_highscores(self) -> List[Any]:
         """Load high scores from file.
 
         Returns:
@@ -188,7 +188,7 @@ class SaveSystem:
         try:
             if self.highscores_file.exists():
                 with open(self.highscores_file, "r") as f:
-                    return json.load(f)
+                    return cast(List[Any], json.load(f))
         except Exception as e:
             game_logger.error(f"Failed to load high scores: {e}")
 

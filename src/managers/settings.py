@@ -3,7 +3,7 @@
 import json
 import os
 from dataclasses import dataclass, asdict
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 
 from ..utils.constants import (
     DEFAULT_SOUND_VOLUME,
@@ -22,7 +22,7 @@ class Settings:
     music_volume: float = DEFAULT_MUSIC_VOLUME
     controller_enabled: bool = False
     controller_deadzone: float = DEFAULT_CONTROLLER_DEADZONE
-    controller_mappings: Dict[str, int] = None
+    controller_mappings: Optional[Dict[str, int]] = None
     dev_mode: bool = False
 
     def __post_init__(self):

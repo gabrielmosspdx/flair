@@ -6,7 +6,7 @@ import pygame
 
 from .base_scene import BaseScene
 from ..entities import Customer, Projectile, ParticleSystem
-from ..utils.constants import COLORS, DrinkType
+from ..utils.constants import COLORS, DrinkType, PROJECTILE_MAX_LIFE
 from ..utils.config import config
 from ..utils.logger import game_logger
 from ..utils.debug import debug_overlay
@@ -49,9 +49,8 @@ class GameScene(BaseScene):
 
     def _reset_projectile(self, projectile: Projectile):
         """Reset projectile for reuse."""
-        projectile.alive = True
-        projectile.life = 0
-        if hasattr(projectile, "groups"):
+        projectile.life = PROJECTILE_MAX_LIFE
+        if hasattr(projectile, "groups") and projectile.groups():
             projectile.remove(self.projectiles)
 
     def enter(self):
