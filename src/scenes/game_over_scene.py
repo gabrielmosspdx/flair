@@ -47,10 +47,10 @@ class GameOverScene(BaseScene):
     
     def start_new_game(self):
         """Start a new game."""
-        self.switch_to("game")
-        # Reset the game scene
+        # Reset the game scene with current settings
         if "game" in self.game.scene_manager.scenes:
-            self.game.scene_manager.scenes["game"].reset_game_state()
+            self.game.scene_manager.scenes["game"].start_new_game()
+        self.switch_to("game")
     
     def go_to_menu(self):
         """Return to main menu."""

@@ -59,7 +59,9 @@ class Config:
                 "restock_duration": 180,
                 "restock_amount": 5,
                 "base_points": 10,
-                "points_per_wave": 2
+                "points_per_wave": 2,
+                "wave_speed_multiplier": 1.05,
+                "min_customer_spawn_distance": 90
             },
             "display": {
                 "screen_width": 1200,
@@ -71,9 +73,13 @@ class Config:
                 "default_music_volume": 0.3
             },
             "debug": {
-                "show_fps": False,
-                "show_collision_boxes": False,
-                "show_entity_count": False
+                "show_collision_boxes": False
+            },
+            "physics": {
+                "customer_reach_threshold": 30
+            },
+            "ui": {
+                "bar_size": 60
             }
         }
     

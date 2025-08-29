@@ -15,16 +15,13 @@ from src.utils.config import config
 def main():
     """Main entry point for integrated game."""
     try:
-        # Setup logging
+        # Setup logging (always enabled)
         log_level = config.get("debug.log_level", "INFO")
-        enable_logging = config.get("debug.enable_logging", True)
-        
-        if enable_logging:
-            game_logger.setup_logger(
-                name='Flair',
-                log_level=log_level,
-                log_to_file=True
-            )
+        game_logger.setup_logger(
+            name='Flair',
+            log_level=log_level,
+            log_to_file=True
+        )
         
         game_logger.info("=" * 50)
         game_logger.info("Starting Flair")

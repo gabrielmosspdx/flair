@@ -116,8 +116,8 @@ class HUD:
         heart_icon = self.assets.get_image('heart')
         if heart_icon:
             for i in range(lives):
-                heart_x = x + 100 + i * 35
-                heart_y = y + 85
+                heart_x = x + 140 + i * 35  # Increased offset from 100 to 140 to avoid text overlap
+                heart_y = y + 80  # Aligned with the Lives text baseline (same as lives_text y position)
                 if self.lives_flash_timer > 0:
                     # Shake effect
                     import random

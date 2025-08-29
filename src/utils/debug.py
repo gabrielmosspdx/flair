@@ -15,11 +15,7 @@ class DebugOverlay:
             font: Font to use for debug text
         """
         self.enabled = False
-        self.show_fps = True
-        self.show_entity_count = True
         self.show_collision_boxes = False
-        self.show_performance = True
-        self.show_input = False
         
         self.font = font  # Will be set later after pygame init
         self.text_color = (0, 255, 0)
@@ -114,23 +110,25 @@ class DebugOverlay:
         lines = []
         y_offset = 10
         
-        # FPS
-        if self.show_fps and self.fps_history:
+        # FPS (always show when overlay is enabled)
+        if self.fps_history:
             avg_fps = sum(self.fps_history) / len(self.fps_history)
             min_fps = min(self.fps_history) if self.fps_history else 0
             max_fps = max(self.fps_history) if self.fps_history else 0
             lines.append(f"FPS: {avg_fps:.1f} (min: {min_fps:.1f}, max: {max_fps:.1f})")
         
-        # Entity counts
-        if self.show_entity_count:
-            for entity_type, count in self.entity_counts.items():
-                lines.append(f"{entity_type}: {count}")
+        # Entity counts (always show when overlay is enabled)
+        for entity_type, count in self.entity_counts.items():
+            lines.append(f"{entity_type}: {count}")
         
-        # Performance timers
-        if self.show_performance and self.frame_times:
+        # Performance timers (always show when overlay is enabled)
+        if self.frame_times:
             lines.append("Performance:")
             for name, time_ms in self.frame_times.items():
                 lines.append(f"  {name}: {time_ms:.2f}ms")
+        
+        # Collision boxes status
+        lines.append(f"Collision Boxes: {'ON' if self.show_collision_boxes else 'OFF'} (F6 to toggle)")
         
         # Game data
         if game_data:
@@ -155,15 +153,16 @@ class DebugOverlay:
             text_surface = self.font.render(line, True, self.text_color)
             screen.blit(text_surface, (10, y_offset + i * 22))
     
-    def draw_collision_box(self, screen: pygame.Surface, rect: pygame.Rect) -> None:
+    def draw_collision_box(self, screen: pygame.Surface, rect: pygame.Rect, color: Optional[Tuple[int, int, int]] = None) -> None:
         """Draw a collision box.
         
         Args:
             screen: Surface to draw on
             rect: Rectangle to draw
+            color: Optional color override
         """
-        if self.enabled and self.show_collision_boxes:
-            pygame.draw.rect(screen, self.box_color, rect, 2)
+        if self.show_collision_boxes:  # Only check show_collision_boxes, not enabled
+            pygame.draw.rect(screen, color or self.box_color, rect, 2)
     
     def draw_vector(
         self,

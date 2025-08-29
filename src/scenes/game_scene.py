@@ -37,8 +37,15 @@ class GameScene(BaseScene):
         self.projectiles = pygame.sprite.RenderUpdates()
         self.particle_system = ParticleSystem()
         
-        self.reset_game_state()
+        # Initialize state variables
         self.paused = False
+        self.game_initialized = False
+        self.score = 0
+        self.wave = 1
+        self.lives = 3
+        self.inventory = {}
+        self.customers_served = 0
+        self.selected_drink = DrinkType.BEER
     
     def _reset_projectile(self, projectile: Projectile):
         """Reset projectile for reuse."""
@@ -46,6 +53,19 @@ class GameScene(BaseScene):
         projectile.life = 0
         if hasattr(projectile, 'groups'):
             projectile.remove(self.projectiles)
+    
+    def enter(self):
+        """Called when scene becomes active."""
+        super().enter()
+        # Only reset if we haven't initialized yet (first time entering)
+        if not self.game_initialized:
+            self.reset_game_state()
+            self.game_initialized = True
+    
+    def start_new_game(self):
+        """Explicitly start a new game."""
+        self.reset_game_state()
+        self.game_initialized = True
     
     def reset_game_state(self):
         """Reset game state for new game."""
@@ -411,6 +431,9 @@ class GameScene(BaseScene):
             color = COLORS['customer'] if not customer.served else COLORS['customer_served']
             pygame.draw.circle(screen, color, (int(customer.x), int(customer.y)), customer.size)
             
+            # Draw collision box for customer
+            debug_overlay.draw_collision_box(screen, customer.rect, (255, 0, 0) if not customer.served else (128, 128, 128))
+            
             if not customer.served:
                 icon_name = f'{customer.drink_type.name.lower()}_icon'
                 icon = self.game.assets.get_image(icon_name)
@@ -432,6 +455,9 @@ class GameScene(BaseScene):
                 rotated = pygame.transform.rotate(icon, projectile.angle)
                 rect = rotated.get_rect(center=(int(projectile.x), int(projectile.y)))
                 screen.blit(rotated, rect)
+            
+            # Draw collision box for projectile
+            debug_overlay.draw_collision_box(screen, projectile.rect, (0, 255, 0))
         
         self.particle_system.draw(screen)
         
@@ -475,7 +501,7 @@ class GameScene(BaseScene):
                 screen.blit(dev_surface, (10, screen.get_height() - 50))
                 
                 # Wave controls help text
-                debug_text = "PageUp/Down: change wave | Shift+4-9,0: jump to waves 5-40 | F4: debug overlay"
+                debug_text = "PageUp/Down: change wave | Shift+4-9,0: jump to waves 5-40 | F4: overlay | F6: collision boxes"
                 text_surface = small_font.render(debug_text, True, (150, 150, 150))
                 screen.blit(text_surface, (10, screen.get_height() - 25))
         else:

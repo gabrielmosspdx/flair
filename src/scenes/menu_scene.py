@@ -46,6 +46,10 @@ class MainMenuScene(BaseScene):
     def start_game(self):
         """Start a new game."""
         game_logger.info("Starting new game from menu")
+        # Explicitly start a new game with current settings
+        if "game" in self.game.scene_manager.scenes:
+            game_scene = self.game.scene_manager.scenes["game"]
+            game_scene.start_new_game()
         self.switch_to("game")
     
     def open_settings(self):

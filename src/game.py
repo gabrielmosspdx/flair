@@ -60,7 +60,8 @@ class FlairGame:
         # Initialize debug overlay
         debug_font = self.assets.get_font('small')
         debug_overlay.font = debug_font
-        debug_overlay.enabled = config.get("debug.show_fps", False)
+        debug_overlay.enabled = False  # Start disabled, F4 toggles it
+        debug_overlay.show_collision_boxes = config.get("debug.show_collision_boxes", False)
         
         # Create floor pattern
         self.floor_surface = self.assets.create_floor_pattern(self.screen_width, self.screen_height)
@@ -112,12 +113,25 @@ class FlairGame:
             self.settings.dev_mode = not self.settings.dev_mode
             self.settings.save()
             game_logger.info(f"Dev Mode: {'enabled' if self.settings.dev_mode else 'disabled'}")
+            
+            # Hide debug overlay when disabling Dev Mode
+            if not self.settings.dev_mode and debug_overlay.enabled:
+                debug_overlay.enabled = False
+                game_logger.info("Debug overlay disabled (Dev Mode off)")
         
         if self.input_manager.is_key_just_pressed(pygame.K_F4):
             # Toggle debug overlay (only works in Dev Mode)
             if self.settings.dev_mode:
                 debug_overlay.toggle()
                 game_logger.info(f"Debug overlay: {'enabled' if debug_overlay.enabled else 'disabled'}")
+        
+        if self.input_manager.is_key_just_pressed(pygame.K_F6):
+            # Toggle collision boxes (only works in Dev Mode)
+            if self.settings.dev_mode:
+                debug_overlay.show_collision_boxes = not debug_overlay.show_collision_boxes
+                config.set("debug.show_collision_boxes", debug_overlay.show_collision_boxes)
+                config.save()
+                game_logger.info(f"Collision boxes: {'enabled' if debug_overlay.show_collision_boxes else 'disabled'}")
         
         if self.input_manager.is_key_just_pressed(pygame.K_F5):
             # Quick save (only during gameplay)
@@ -180,21 +194,40 @@ class FlairGame:
         debug_overlay.end_timer("frame")
     
     def run(self):
-        """Main game loop."""
+        """Main game loop with fixed timestep for game logic."""
         game_logger.info("Starting main game loop")
         self.audio.play_music()
         
+        # Fixed timestep for game logic (60 Hz)
+        FIXED_TIMESTEP = 1.0 / 60.0  # 60 updates per second
+        accumulator = 0.0
+        current_time = pygame.time.get_ticks() / 1000.0
+        
         while self.running:
-            # Calculate delta time
-            self.dt = self.clock.tick(self.fps) / 1000.0
+            new_time = pygame.time.get_ticks() / 1000.0
+            frame_time = new_time - current_time
+            current_time = new_time
             
-            # Game loop
+            # Prevent spiral of death
+            frame_time = min(frame_time, 0.25)
+            
+            accumulator += frame_time
+            
+            # Handle events always
             self.handle_events()
-            self.update()
-            self.draw()
             
-            # Update display
+            # Fixed timestep updates
+            while accumulator >= FIXED_TIMESTEP:
+                self.dt = FIXED_TIMESTEP
+                self.update()
+                accumulator -= FIXED_TIMESTEP
+            
+            # Render at display FPS
+            self.draw()
             pygame.display.flip()
+            
+            # Limit display FPS
+            self.clock.tick(self.fps)
         
         # Cleanup
         game_logger.info("Shutting down game")

@@ -1,7 +1,7 @@
 {
     "game": {
         "initial_lives": 3,
-        "initial_inventory": 5,
+        "initial_inventory": 20,
         "base_spawn_delay": 120,
         "base_customer_speed": 0.5,
         "initial_wave_size": 8,
@@ -11,42 +11,27 @@
         "base_points": 10,
         "points_per_wave": 2,
         "wave_speed_multiplier": 1.05,
-        "spawn_delay_reduction": 8,
-        "min_customer_spawn_distance": 90,
-        "spawn_retry_attempts": 10
-    },
-    "physics": {
-        "projectile_speed": 6,
-        "projectile_max_life": 150,
-        "particle_life": 30,
-        "customer_reach_threshold": 30
-    },
-    "ui": {
-        "bar_size": 60,
-        "button_width": 200,
-        "button_height": 50,
-        "slider_width": 250,
-        "slider_height": 20
+        "min_customer_spawn_distance": 90
     },
     "display": {
         "screen_width": 1200,
         "screen_height": 800,
-        "fps": 60,
-        "vsync": false,
-        "fullscreen": false
+        "fps": 30
     },
     "audio": {
         "default_sound_volume": 0.7,
-        "default_music_volume": 0.3,
-        "mixer_frequency": 44100,
-        "mixer_buffer": 4096,
-        "mixer_channels": 8
+        "default_music_volume": 0.3
     },
     "debug": {
         "show_fps": false,
         "show_collision_boxes": false,
         "show_entity_count": false,
-        "enable_logging": true,
-        "log_level": "INFO"
+        "enable_logging": false
+    },
+    "physics": {
+        "customer_reach_threshold": 30
+    },
+    "ui": {
+        "bar_size": 60
     }
 }
