@@ -1,11 +1,12 @@
 """Asset manager for loading and caching game resources."""
 
 import os
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 import pygame
 
 from ..utils.constants import FONT_FILE, IMAGES_DIR
+from ..utils.sprite_sheet import SpriteSheetManager
 
 
 class AssetManager:
@@ -15,6 +16,8 @@ class AssetManager:
         """Initialize the asset manager."""
         self.images: Dict[str, Optional[pygame.Surface]] = {}
         self.fonts: Dict[str, pygame.font.Font] = {}
+        self.sprite_sheet_manager = SpriteSheetManager()
+        self.sprite_animations: Dict[str, Dict[str, List[pygame.Surface]]] = {}
         self._loaded = False
 
     def load_all(self) -> None:
@@ -24,6 +27,7 @@ class AssetManager:
 
         self.load_fonts()
         self.load_images()
+        self.load_sprite_sheets()
         self._loaded = True
 
     def load_fonts(self) -> None:
@@ -154,3 +158,76 @@ class AssetManager:
                 floor_surface.blit(floor_image, (x * tile_width, y * tile_height))
 
         return floor_surface
+
+    def load_sprite_sheets(self) -> None:
+        """Load sprite sheets for animated sprites."""
+        # Define sprite sheets to load with their configurations
+        sprite_configs = [
+            {
+                "name": "customer",
+                "image": "customer_sheet.png",
+                "json": "customer_sheet.json",
+                "fallback_grid": (4, 4, 132, 132),  # rows, cols, width, height
+                "animations": {
+                    "idle": (0, 4),  # frames 0-3
+                    "walk": (4, 8),  # frames 4-7
+                    "happy": (8, 12),  # frames 8-11
+                    "sad": (12, 16),  # frames 12-15
+                },
+            }
+            # Add more sprite sheet configs here as needed
+        ]
+
+        for config in sprite_configs:
+            self._load_sprite_sheet(config)
+
+    def _load_sprite_sheet(self, config: dict) -> None:
+        """Load a single sprite sheet based on configuration.
+
+        Args:
+            config: Sprite sheet configuration dictionary
+        """
+        name = config["name"]
+        sprite_sheet_path = os.path.join(IMAGES_DIR, "sprites", config["image"])
+        json_path = os.path.join(IMAGES_DIR, "sprites", config["json"])
+
+        if os.path.exists(sprite_sheet_path):
+            try:
+                # Load the sprite sheet
+                self.sprite_sheet_manager.load_sprite_sheet(
+                    name, sprite_sheet_path, json_path if os.path.exists(json_path) else None
+                )
+
+                # Extract animations if sprite sheet loaded successfully
+                sheet = self.sprite_sheet_manager.get_sprite_sheet(name)
+                if sheet:
+                    # If we have JSON data with defined animations
+                    if sheet.frames:
+                        self.sprite_animations[name] = sheet.frames
+                    elif "fallback_grid" in config:
+                        # Try to extract frames uniformly
+                        rows, cols, width, height = config["fallback_grid"]
+                        frames = sheet.get_frames_uniform(rows, cols, width, height)
+                        if frames and "animations" in config:
+                            # Divide frames into animations
+                            animations = {}
+                            for anim_name, (start, end) in config["animations"].items():
+                                animations[anim_name] = frames[start:end]
+                            self.sprite_animations[name] = animations
+
+                print(f"Loaded {name} sprite sheet: {sprite_sheet_path}")
+            except Exception as e:
+                print(f"Could not load {name} sprite sheet: {e}")
+        else:
+            print(f"{name} sprite sheet not found: {sprite_sheet_path}")
+
+    def get_sprite_animations(self, sprite_type: str) -> Optional[Dict[str, List[pygame.Surface]]]:
+        """Get animation frames for a sprite type.
+
+        Args:
+            sprite_type: Type of sprite (e.g., 'customer', 'player')
+
+        Returns:
+            Dictionary of animation frames or None
+        """
+        return self.sprite_animations.get(sprite_type)

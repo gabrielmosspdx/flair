@@ -170,8 +170,17 @@ class GameScene(BaseScene):
         speed_multiplier = config.get("game.wave_speed_multiplier", 1.05) ** (self.wave - 1)
         customer_speed = base_speed * speed_multiplier
 
+        # Get sprite animations from asset manager
+        sprite_frames = self.game.assets.get_sprite_animations("customer")
+
         customer = Customer(
-            spawn_x, spawn_y, self.player_x, self.player_y, drink_type, customer_speed
+            spawn_x,
+            spawn_y,
+            self.player_x,
+            self.player_y,
+            drink_type,
+            customer_speed,
+            sprite_frames=sprite_frames,
         )
         self.customers.add(customer)
         self.customers_in_wave += 1
@@ -439,8 +448,13 @@ class GameScene(BaseScene):
 
         # Draw entities
         for customer in self.customers:
-            color = COLORS["customer"] if not customer.served else COLORS["customer_served"]
-            pygame.draw.circle(screen, color, (int(customer.x), int(customer.y)), customer.size)
+            # Draw the customer sprite
+            if customer.image:
+                screen.blit(customer.image, customer.rect)
+            else:
+                # Fallback to circle if no sprite available
+                color = COLORS["customer"] if not customer.served else COLORS["customer_served"]
+                pygame.draw.circle(screen, color, (int(customer.x), int(customer.y)), customer.size)
 
             # Draw collision box for customer
             debug_overlay.draw_collision_box(
