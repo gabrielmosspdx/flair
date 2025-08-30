@@ -8,6 +8,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 # Using UV (recommended)
 uv run python src/main.py
+uv run python src/main.py --debug  # Run with debug mode
+
+# Using Makefile shortcuts
+make run   # Standard run
+make dev   # Run with debug mode
 
 # Using standard Python
 python src/main.py
@@ -15,21 +20,42 @@ python src/main.py
 
 ### Development Setup
 ```bash
-# Install development dependencies
+# Complete setup with pre-commit hooks
+make setup
+
+# Or manually
 uv pip install -e ".[dev]"
+uv run pre-commit install
 ```
 
 ### Code Quality
 ```bash
-# Format code with Black
-uv run black src/
+# Format code
+make format
+# Or manually:
+uv run black src/ tests/
+uv run isort src/ tests/ --profile black --line-length 100
 
-# Type check with mypy
+# Lint code
+make lint
+# Or manually:
+uv run flake8 src/ tests/ --max-line-length=100 --extend-ignore=E203
+
+# Type check
+make type-check
+# Or manually:
 uv run mypy src/
 
-# Run tests
-uv run pytest
-uv run pytest tests/test_config.py  # Run single test file
+# Run all tests with coverage
+make test
+# Or manually:
+uv run pytest tests/ --cov=src --cov-report=term-missing
+
+# Run single test file
+uv run pytest tests/test_config.py
+
+# Run pre-commit on all files
+make pre-commit
 ```
 
 ## Architecture Overview
@@ -58,6 +84,8 @@ This is a Pygame-based arcade game with a clean, modular architecture following 
 - `src/utils/save_system.py`: Handles game saves and high score persistence
 - `src/utils/config.py`: Configuration system that merges JSON configs with runtime settings
 - `src/utils/debug.py`: Debug overlay system (F3 key) for performance monitoring
+- `src/entities/customer.py`: Customer entity with animated sprites and Vector2-based movement
+- `src/entities/animated_sprite.py`: Base class for sprite sheet animations
 
 ### Data Flow
 
@@ -69,11 +97,13 @@ This is a Pygame-based arcade game with a clean, modular architecture following 
 ### Important Constants
 
 Game mechanics constants are centralized in `src/utils/constants.py`:
-- `BASE_CUSTOMER_SPEED`: Customer movement speed
-- `INITIAL_WAVE_SIZE`: Starting wave difficulty
+- `BASE_CUSTOMER_SPEED`: Customer movement speed (0.5)
+- `INITIAL_WAVE_SIZE`: Starting wave difficulty (8)
 - `RESTOCK_DURATION`: Frames for restock action (180 = 3 seconds at 60 FPS)
 - `DrinkType` enum: Defines drink types (BEER, WINE, COCKTAIL)
 - `GameState` enum: Defines game states for scene transitions
+- `PROJECTILE_SPEED`: Projectile movement speed (6)
+- `PROJECTILE_MAX_LIFE`: Max projectile lifetime in frames (150)
 
 ### Debug Features
 
@@ -87,9 +117,15 @@ Tests use pytest and are located in `tests/`. Focus areas:
 - Configuration system (`test_config.py`)
 - Object pooling performance (`test_object_pool.py`)
 
+Run tests with coverage:
+```bash
+make test
+```
+
 ### Performance Considerations
 
 - Object pooling for projectiles and particles to reduce GC pressure
 - Sprite groups for efficient collision detection
 - Debug overlay to monitor performance metrics
-- Wave size capping at MAX_WAVE_SIZE to prevent performance degradation
+- Wave size capping at MAX_WAVE_SIZE (20) to prevent performance degradation
+- Vector2 math for optimized movement calculations in Customer entities
