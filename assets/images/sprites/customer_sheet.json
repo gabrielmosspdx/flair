@@ -1,0 +1,47 @@
+{
+  "description": "Updated sprite sheet configuration for customer animations",
+  "sprite_width": 132,
+  "sprite_height": 132,
+  "animations": {
+    "idle": {
+      "description": "Standing idle animation",
+      "frames": [
+        { "x": 0, "y": 0, "width": 132, "height": 132 },
+        { "x": 132, "y": 0, "width": 132, "height": 132 },
+        { "x": 264, "y": 0, "width": 132, "height": 132 },
+        { "x": 396, "y": 0, "width": 132, "height": 132 }
+      ],
+      "frame_duration": 150
+    },
+    "walk": {
+      "description": "Walking animation",
+      "frames": [
+        { "x": 0, "y": 132, "width": 132, "height": 132 },
+        { "x": 132, "y": 132, "width": 132, "height": 132 },
+        { "x": 264, "y": 132, "width": 132, "height": 132 },
+        { "x": 396, "y": 132, "width": 132, "height": 132 }
+      ],
+      "frame_duration": 100
+    },
+    "happy": {
+      "description": "Happy/successful service animation",
+      "frames": [
+        { "x": 0, "y": 264, "width": 132, "height": 132 },
+        { "x": 132, "y": 264, "width": 132, "height": 132 },
+        { "x": 264, "y": 264, "width": 132, "height": 132 },
+        { "x": 396, "y": 264, "width": 132, "height": 132 }
+      ],
+      "frame_duration": 120
+    },
+    "sad": {
+      "description": "Sad/failed service animation",
+      "frames": [
+        { "x": 0, "y": 396, "width": 132, "height": 132 },
+        { "x": 132, "y": 396, "width": 132, "height": 132 },
+        { "x": 264, "y": 396, "width": 132, "height": 132 },
+        { "x": 396, "y": 396, "width": 132, "height": 132 }
+      ],
+      "frame_duration": 150
+    }
+  }
+}
