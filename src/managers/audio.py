@@ -21,20 +21,27 @@ class AudioManager:
         self.sounds: Dict[str, Optional[pygame.mixer.Sound]] = {}
         self.music_loaded = False
         self._initialized = False
+        self._audio_available = True
 
     def initialize(self) -> None:
         """Initialize pygame mixer and load audio assets."""
         if self._initialized:
             return
 
-        # Use larger buffer for WSL2 compatibility
-        pygame.mixer.pre_init(frequency=44100, size=-16, channels=2, buffer=4096)
-        pygame.mixer.init()
-        pygame.mixer.set_num_channels(8)
-        self.load_sounds()
-        self.load_music()
-        self.apply_volumes()
-        self._initialized = True
+        try:
+            # Use larger buffer for WSL2 compatibility
+            pygame.mixer.pre_init(frequency=44100, size=-16, channels=2, buffer=4096)
+            pygame.mixer.init()
+            pygame.mixer.set_num_channels(8)
+            self.load_sounds()
+            self.load_music()
+            self.apply_volumes()
+            self._initialized = True
+        except pygame.error as e:
+            print(f"Warning: Audio system not available: {e}")
+            print("Game will continue without sound")
+            self._audio_available = False
+            self._initialized = True
 
     def load_sounds(self) -> None:
         """Load all sound effects."""
@@ -98,6 +105,8 @@ class AudioManager:
         Args:
             name: Name of the sound to play
         """
+        if not self._audio_available:
+            return
         sound = self.sounds.get(name)
         if sound:
             sound.play()
@@ -108,19 +117,27 @@ class AudioManager:
         Args:
             loops: Number of loops (-1 for infinite)
         """
+        if not self._audio_available:
+            return
         if self.music_loaded and not pygame.mixer.music.get_busy():
             pygame.mixer.music.play(loops)
 
     def stop_music(self) -> None:
         """Stop background music."""
+        if not self._audio_available:
+            return
         pygame.mixer.music.stop()
 
     def pause_music(self) -> None:
         """Pause background music."""
+        if not self._audio_available:
+            return
         pygame.mixer.music.pause()
 
     def unpause_music(self) -> None:
         """Unpause background music."""
+        if not self._audio_available:
+            return
         pygame.mixer.music.unpause()
 
     def set_sound_volume(self, volume: float) -> None:
@@ -139,5 +156,5 @@ class AudioManager:
             volume: Volume level (0.0 to 1.0)
         """
         self.settings.music_volume = max(0.0, min(1.0, volume))
-        if self.music_loaded:
+        if self._audio_available and self.music_loaded:
             pygame.mixer.music.set_volume(self.settings.music_volume)
