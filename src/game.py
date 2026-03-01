@@ -1,5 +1,7 @@
 """Fully integrated game with all refactored systems properly connected (no nested classes)."""
 
+import asyncio
+
 import pygame
 
 from .managers import AssetManager, AudioManager, Settings
@@ -199,8 +201,8 @@ class FlairGame:
 
         debug_overlay.end_timer("frame")
 
-    def run(self):
-        """Main game loop with fixed timestep for game logic."""
+    async def run(self):
+        """Main game loop with fixed timestep for game logic, adapted for WebAssembly."""
         game_logger.info("Starting main game loop")
         self.audio.play_music()
 
@@ -234,6 +236,9 @@ class FlairGame:
 
             # Limit display FPS
             self.clock.tick(self.fps)
+
+            # Yield control to the browser event loop (required for WebAssembly)
+            await asyncio.sleep(0)
 
         # Cleanup
         game_logger.info("Shutting down game")

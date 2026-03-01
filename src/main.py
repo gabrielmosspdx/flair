@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Main entry point for the Flair game."""
 
+import asyncio
 import os
 import sys
 
@@ -12,7 +13,7 @@ from src.utils.config import config  # noqa: E402
 from src.utils.logger import game_logger  # noqa: E402
 
 
-def main():
+async def main():
     """Main entry point for integrated game."""
     try:
         # Setup logging (always enabled)
@@ -34,7 +35,7 @@ def main():
 
         # Create and run the integrated game
         game = FlairGame()
-        game.run()
+        await game.run()
 
     except KeyboardInterrupt:
         game_logger.info("Game interrupted by user")
@@ -47,8 +48,7 @@ def main():
         traceback.print_exc()
     finally:
         game_logger.info("Game shutdown complete")
-        sys.exit(0)
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
