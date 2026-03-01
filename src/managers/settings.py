@@ -32,12 +32,11 @@ class Settings:
 
     def save(self) -> None:
         """Save settings to file."""
-        os.makedirs(os.path.dirname(SETTINGS_FILE), exist_ok=True)
-
         try:
+            os.makedirs(os.path.dirname(SETTINGS_FILE), exist_ok=True)
             with open(SETTINGS_FILE, "w") as f:
                 json.dump(asdict(self), f, indent=2)
-        except Exception as e:
+        except OSError as e:
             print(f"Could not save settings: {e}")
 
     @classmethod

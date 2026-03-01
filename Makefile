@@ -1,4 +1,4 @@
-.PHONY: help install install-dev test format lint type-check clean run dev setup pre-commit
+.PHONY: help install install-dev test format lint type-check clean run dev setup pre-commit web web-serve
 
 help:
 	@echo "Available commands (using uv):"
@@ -13,6 +13,8 @@ help:
 	@echo "  make run          - Run the game"
 	@echo "  make dev          - Run with debug mode enabled"
 	@echo "  make pre-commit   - Run pre-commit on all files"
+	@echo "  make web          - Build static web bundle (output: build/web/)"
+	@echo "  make web-serve    - Serve the game locally in the browser (hot-reload)"
 
 install:
 	uv pip install --upgrade pip
@@ -53,3 +55,9 @@ dev:
 
 pre-commit:
 	uv run pre-commit run --all-files
+
+web:
+	uv run python -m pygbag --build .
+
+web-serve:
+	uv run python -m pygbag .

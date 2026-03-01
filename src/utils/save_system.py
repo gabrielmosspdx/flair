@@ -18,7 +18,11 @@ class SaveSystem:
             save_dir: Directory for save files
         """
         self.save_dir = Path(save_dir)
-        self.save_dir.mkdir(exist_ok=True)
+        try:
+            self.save_dir.mkdir(exist_ok=True)
+        except OSError:
+            # Filesystem not writable (e.g. WebAssembly) — saves will be no-ops
+            pass
 
         self.autosave_file = self.save_dir / "autosave.json"
         self.highscores_file = self.save_dir / "highscores.json"
