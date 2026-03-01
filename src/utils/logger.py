@@ -53,23 +53,27 @@ class GameLogger:
         console_handler.setFormatter(console_format)
         self.logger.addHandler(console_handler)
 
-        # File handler
+        # File handler (skipped in WebAssembly / web environments)
         if log_to_file:
-            log_path = Path(log_dir)
-            log_path.mkdir(exist_ok=True)
+            try:
+                log_path = Path(log_dir)
+                log_path.mkdir(exist_ok=True)
 
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            log_file = log_path / f"flair_{timestamp}.log"
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                log_file = log_path / f"flair_{timestamp}.log"
 
-            file_handler = logging.FileHandler(log_file)
-            file_handler.setLevel(logging.DEBUG)
-            file_format = logging.Formatter(
-                "%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s"
-            )
-            file_handler.setFormatter(file_format)
-            self.logger.addHandler(file_handler)
+                file_handler = logging.FileHandler(log_file)
+                file_handler.setLevel(logging.DEBUG)
+                file_format = logging.Formatter(
+                    "%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s"
+                )
+                file_handler.setFormatter(file_format)
+                self.logger.addHandler(file_handler)
 
-            self.logger.info(f"Logging to file: {log_file}")
+                self.logger.info(f"Logging to file: {log_file}")
+            except OSError:
+                # Filesystem not writable (e.g. WebAssembly) — console only
+                pass
 
     def debug(self, message: str, *args, **kwargs) -> None:
         """Log debug message.
