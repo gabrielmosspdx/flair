@@ -8,7 +8,7 @@ from ..utils.constants import COLORS
 
 
 class Button:
-    """A clickable button UI element."""
+    """A clickable button UI element with bar-sign styling."""
 
     def __init__(
         self,
@@ -52,7 +52,7 @@ class Button:
         self.color_hover = color_hover or COLORS["button_hover"]
         self.color_pressed = color_pressed or COLORS["button_pressed"]
         self.color_text = color_text or COLORS["text_white"]
-        self.color_border = COLORS["text_gold"]
+        self.color_border = COLORS["button_border"]
 
     def update(self, mouse_pos: Tuple[int, int], mouse_clicked: bool) -> bool:
         """Update button state.
@@ -81,14 +81,14 @@ class Button:
         return clicked
 
     def draw(self, screen: pygame.Surface) -> None:
-        """Draw the button.
+        """Draw the button with rounded corners, glow, shadow, and sheen.
 
         Args:
             screen: Surface to draw on
         """
-        # Determine color based on state
+        # Determine fill color based on state
         if not self.enabled:
-            color = COLORS["text_gray"]
+            color = COLORS["tab_inactive"]
         elif self.pressed:
             color = self.color_pressed
         elif self.hovered:
@@ -96,14 +96,51 @@ class Button:
         else:
             color = self.color_bg
 
-        # Draw button background
-        pygame.draw.rect(screen, color, self.rect)
-        pygame.draw.rect(screen, self.color_border, self.rect, 2)
+        border_color = COLORS["text_gray"] if not self.enabled else self.color_border
 
-        # Draw text
-        text_color = COLORS["text_gray"] if not self.enabled else self.color_text
+        # Outer glow aura on hover
+        if self.hovered and self.enabled:
+            for radius_extra, alpha in [(14, 25), (8, 45), (3, 70)]:
+                gw = self.rect.width + radius_extra * 2
+                gh = self.rect.height + radius_extra * 2
+                glow_surf = pygame.Surface((gw, gh), pygame.SRCALPHA)
+                pygame.draw.rect(
+                    glow_surf,
+                    (*border_color, alpha),
+                    pygame.Rect(0, 0, gw, gh),
+                    border_radius=8 + radius_extra,
+                )
+                screen.blit(glow_surf, (self.rect.x - radius_extra, self.rect.y - radius_extra))
+
+        # Drop shadow (offset bottom-right)
+        shadow_surf = pygame.Surface((self.rect.width, self.rect.height), pygame.SRCALPHA)
+        pygame.draw.rect(
+            shadow_surf,
+            (0, 0, 0, 90),
+            shadow_surf.get_rect(),
+            border_radius=6,
+        )
+        screen.blit(shadow_surf, (self.rect.x + 3, self.rect.y + 4))
+
+        # Button body
+        pygame.draw.rect(screen, color, self.rect, border_radius=6)
+
+        # Top-edge highlight sheen (depth illusion)
+        if self.enabled and not self.pressed:
+            sheen_rect = pygame.Rect(self.rect.x + 5, self.rect.y + 4, self.rect.width - 10, 2)
+            sheen_surf = pygame.Surface((sheen_rect.width, sheen_rect.height), pygame.SRCALPHA)
+            sheen_surf.fill((255, 255, 255, 30))
+            screen.blit(sheen_surf, sheen_rect.topleft)
+
+        # Border
+        pygame.draw.rect(screen, border_color, self.rect, 2, border_radius=6)
+
+        # Text (shifts down 1px when pressed for click-feel)
+        text_color = COLORS["text_dim"] if not self.enabled else self.color_text
         text_surface = self.font.render(self.text, True, text_color)
         text_rect = text_surface.get_rect(center=self.rect.center)
+        if self.pressed:
+            text_rect.y += 1
         screen.blit(text_surface, text_rect)
 
     def set_enabled(self, enabled: bool) -> None:
