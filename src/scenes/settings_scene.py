@@ -375,33 +375,67 @@ class SettingsScene(BaseScene):
         """Update scene logic."""
         pass  # No continuous updates needed
 
+    def _draw_settings_panel(self, screen: pygame.Surface) -> None:
+        """Draw the main content area panel."""
+        cx = self.game.screen_width // 2
+        pw, ph = 760, 480
+        px, py = cx - pw // 2, 195
+        panel_surf = pygame.Surface((pw, ph), pygame.SRCALPHA)
+        panel_surf.fill((10, 5, 2, 160))
+        pygame.draw.rect(
+            panel_surf, (*COLORS["panel_border"], 70), pygame.Rect(0, 0, pw, ph), 1,
+            border_radius=4
+        )
+        screen.blit(panel_surf, (px, py))
+
     def draw(self, screen: pygame.Surface):
         """Draw the settings screen."""
         screen.fill(COLORS["menu_bg"])
+        cx = self.game.screen_width // 2
+
+        # Subtle warm ambient glow at top
+        for r in (350, 250, 150):
+            gs = pygame.Surface((r * 2, r), pygame.SRCALPHA)
+            pygame.draw.ellipse(gs, (180, 100, 20, max(0, 12 - (350 - r) // 30)),
+                                gs.get_rect())
+            screen.blit(gs, (cx - r, -r // 2))
 
         # Title
         title_font = self.game.assets.get_font("large")
         title = title_font.render("Settings", True, COLORS["text_gold"])
-        title_rect = title.get_rect(center=(self.game.screen_width // 2, 80))
+        title_rect = title.get_rect(center=(cx, 75))
         screen.blit(title, title_rect)
 
-        # Draw tab buttons with highlighting
-        for i, button in enumerate(self.tab_buttons):
-            if i == self.current_tab:
-                # Highlight current tab
-                highlight_rect = pygame.Rect(
-                    button.rect.x - 2,
-                    button.rect.y - 2,
-                    button.rect.width + 4,
-                    button.rect.height + 4,
-                )
-                pygame.draw.rect(screen, COLORS["text_gold"], highlight_rect, 2)
-            button.draw(screen)
+        # Ornamental divider under title
+        col = COLORS["panel_border"]
+        pygame.draw.line(screen, col, (cx - 200, 112), (cx - 12, 112), 1)
+        pygame.draw.line(screen, col, (cx + 12, 112), (cx + 200, 112), 1)
+        pts = [(cx, 106), (cx + 8, 112), (cx, 118), (cx - 8, 112)]
+        pygame.draw.polygon(screen, COLORS["text_gold"], pts)
 
-        # Draw current tab content
+        # Content panel
+        self._draw_settings_panel(screen)
+
+        # Tab buttons with active-tab underline highlight
+        for i, button in enumerate(self.tab_buttons):
+            # Override button colors for active/inactive tab feel
+            if i == self.current_tab:
+                button.color_bg = COLORS["tab_active"]
+                button.color_hover = COLORS["tab_active"]
+            else:
+                button.color_bg = COLORS["tab_inactive"]
+                button.color_hover = COLORS["button_hover"]
+            button.draw(screen)
+            if i == self.current_tab:
+                # Underline bar for active tab
+                underline_surf = pygame.Surface((button.rect.width, 3), pygame.SRCALPHA)
+                underline_surf.fill((*COLORS["text_gold"], 200))
+                screen.blit(underline_surf, (button.rect.x, button.rect.bottom + 1))
+
+        # Tab content
         self.draw_tab_content(screen)
 
-        # Draw common buttons
+        # Common action buttons
         self.back_button.draw(screen)
         self.apply_button.draw(screen)
         self.reset_button.draw(screen)
@@ -409,7 +443,7 @@ class SettingsScene(BaseScene):
         # Dev mode indicator
         if self.game.settings.dev_mode:
             font = self.game.assets.get_font("small")
-            dev_text = font.render("DEV MODE ACTIVE", True, (255, 100, 100))
+            dev_text = font.render("DEV MODE ACTIVE", True, COLORS["text_red"])
             screen.blit(dev_text, (10, 10))
 
     def draw_tab_content(self, screen: pygame.Surface):
@@ -428,28 +462,30 @@ class SettingsScene(BaseScene):
         elif current_tab_name == "Controls":
             self.draw_controls_tab(screen, small_font)
 
+    def _draw_note(self, screen: pygame.Surface, text: str, y: int = 638) -> None:
+        """Draw a styled note/hint below the tab content area."""
+        cx = self.game.screen_width // 2
+        note_font = self.game.assets.get_font("small")
+        note_surf = note_font.render(text, True, COLORS["text_amber"])
+        note_rect = note_surf.get_rect(center=(cx, y))
+        note_surf.set_alpha(180)
+        screen.blit(note_surf, note_rect)
+
     def draw_gameplay_tab(self, screen: pygame.Surface, font: pygame.font.Font):
         """Draw Gameplay tab content."""
         for slider in self.sliders["Gameplay"].values():
             slider.draw(screen, font)
-
-        # Draw note about settings that need new game
-        note_font = self.game.assets.get_font("small")
-        note_text = "* Initial Lives, Initial Inventory, and Initial Wave Size apply to new games"
-        note_surface = note_font.render(note_text, True, (200, 200, 100))
-        screen.blit(note_surface, (250, 630))
+        self._draw_note(
+            screen, "* Initial Lives, Inventory, and Wave Size apply to new games"
+        )
 
     def draw_display_tab(self, screen: pygame.Surface, font: pygame.font.Font):
         """Draw Display tab content."""
-        # Draw sliders
         for slider in self.sliders["Display"].values():
             slider.draw(screen, font)
-
-        # Draw note about FPS
-        note_font = self.game.assets.get_font("small")
-        note_text = "* Game logic runs at fixed 60 Hz. Display FPS only affects visual smoothness."
-        note_surface = note_font.render(note_text, True, (200, 200, 100))
-        screen.blit(note_surface, (250, 630))
+        self._draw_note(
+            screen, "* Game logic runs at fixed 60 Hz. FPS only affects visual smoothness."
+        )
 
     def draw_audio_tab(self, screen: pygame.Surface, font: pygame.font.Font):
         """Draw Audio tab content."""
@@ -458,44 +494,53 @@ class SettingsScene(BaseScene):
 
     def draw_debug_tab(self, screen: pygame.Surface, font: pygame.font.Font):
         """Draw Debug tab content."""
-        checkbox_y = 220
-        checkbox_spacing = 40
+        checkbox_y = 230
+        checkbox_spacing = 50
         checkbox_labels = {
             "show_collision_boxes": "Show Collision Boxes",
             "dev_mode": "Developer Mode",
         }
 
         for i, (key, label) in enumerate(checkbox_labels.items()):
-            # Draw checkbox
-            checkbox_rect = pygame.Rect(350, checkbox_y + i * checkbox_spacing, 20, 20)
-            pygame.draw.rect(screen, COLORS["text_white"], checkbox_rect, 2)
-            if self.checkboxes["Debug"][key]:
-                # Draw checkmark
+            row_y = checkbox_y + i * checkbox_spacing
+            checked = self.checkboxes["Debug"][key]
+
+            # Checkbox background
+            checkbox_rect = pygame.Rect(350, row_y, 22, 22)
+            bg_surf = pygame.Surface((22, 22), pygame.SRCALPHA)
+            bg_surf.fill((10, 5, 2, 200) if checked else (30, 15, 5, 120))
+            screen.blit(bg_surf, checkbox_rect.topleft)
+
+            border_col = COLORS["text_gold"] if checked else COLORS["panel_border"]
+            pygame.draw.rect(screen, border_col, checkbox_rect, 2, border_radius=3)
+
+            if checked:
+                # Gold checkmark
                 pygame.draw.line(
                     screen,
                     COLORS["text_gold"],
-                    (checkbox_rect.left + 3, checkbox_rect.centery),
-                    (checkbox_rect.centerx - 2, checkbox_rect.bottom - 3),
+                    (checkbox_rect.left + 4, checkbox_rect.centery),
+                    (checkbox_rect.centerx - 1, checkbox_rect.bottom - 4),
                     2,
                 )
                 pygame.draw.line(
                     screen,
                     COLORS["text_gold"],
-                    (checkbox_rect.centerx - 2, checkbox_rect.bottom - 3),
-                    (checkbox_rect.right - 3, checkbox_rect.top + 3),
+                    (checkbox_rect.centerx - 1, checkbox_rect.bottom - 4),
+                    (checkbox_rect.right - 3, checkbox_rect.top + 4),
                     2,
                 )
 
-            # Draw label
-            label_text = font.render(label, True, COLORS["text_white"])
-            screen.blit(label_text, (checkbox_rect.right + 15, checkbox_rect.centery - 10))
+            label_col = COLORS["text_white"] if checked else COLORS["text_gray"]
+            label_text = font.render(label, True, label_col)
+            screen.blit(label_text, (checkbox_rect.right + 18, row_y - 1))
 
     def draw_controls_tab(self, screen: pygame.Surface, font: pygame.font.Font):
         """Draw Controls tab content."""
-        controls_y = 220
+        controls_y = 215
         controls = [
             ("Game Controls", None),
-            ("1/2/3", "Select Drink"),
+            ("1 / 2 / 3", "Select Drink"),
             ("Mouse", "Aim & Throw"),
             ("R", "Restock"),
             ("P", "Pause"),
@@ -503,26 +548,29 @@ class SettingsScene(BaseScene):
             ("", ""),
             ("Developer Controls", None),
             ("F3", "Toggle Dev Mode"),
-            ("F4", "Debug Overlay (Dev Mode)"),
+            ("F4", "Debug Overlay"),
             ("F5", "Quick Save"),
-            ("F6", "Collision Boxes (Dev Mode)"),
-            ("PageUp/Down", "Change Wave (Dev Mode)"),
-            ("Shift+4-9,0", "Jump to Wave (Dev Mode)"),
+            ("F6", "Collision Boxes"),
+            ("PageUp / Down", "Change Wave"),
+            ("Shift + 4–9, 0", "Jump to Wave"),
         ]
 
+        header_font = self.game.assets.get_font("normal")
+        key_x = 360
+        action_x = 520
+
         for i, (key, action) in enumerate(controls):
+            row_y = controls_y + i * 26
             if action is None:
-                # Section header
-                header_font = self.game.assets.get_font("normal")
-                text = header_font.render(key, True, COLORS["text_gold"])
-                screen.blit(text, (300, controls_y + i * 25))
+                # Section header with mini-divider
+                text = header_font.render(key, True, COLORS["text_amber"])
+                screen.blit(text, (key_x - 10, row_y))
+                pygame.draw.line(screen, COLORS["panel_border"],
+                                 (key_x - 10, row_y + 32), (key_x + 300, row_y + 32), 1)
             elif key or action:
-                # Draw key
                 if key:
                     key_text = font.render(key, True, COLORS["text_gold"])
-                    screen.blit(key_text, (350, controls_y + i * 25))
-
-                # Draw action
+                    screen.blit(key_text, (key_x, row_y))
                 if action:
-                    action_text = font.render(f"- {action}", True, COLORS["text_white"])
-                    screen.blit(action_text, (500, controls_y + i * 25))
+                    action_text = font.render(f"· {action}", True, COLORS["text_white"])
+                    screen.blit(action_text, (action_x, row_y))

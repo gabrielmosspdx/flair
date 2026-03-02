@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "web-serve",
+      "runtimeExecutable": "uv",
+      "runtimeArgs": ["run", "--python", "3.12", "python", "-m", "pygbag", "--disable-sound-format-error", "."],
+      "port": 8000
+    }
+  ]
+}

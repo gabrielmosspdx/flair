@@ -7,6 +7,24 @@ import pygame
 from ..utils.constants import COLORS, DrinkType
 
 
+def _draw_panel(screen: pygame.Surface, x: int, y: int, w: int, h: int, alpha: int = 150) -> None:
+    """Draw a dark semi-transparent panel with a gold border."""
+    surf = pygame.Surface((w, h), pygame.SRCALPHA)
+    surf.fill((10, 5, 2, alpha))
+    pygame.draw.rect(surf, (*COLORS["panel_border"], 90), pygame.Rect(0, 0, w, h), 1,
+                     border_radius=4)
+    screen.blit(surf, (x, y))
+
+
+def _draw_divider(screen: pygame.Surface, cx: int, y: int, half_w: int) -> None:
+    """Draw an ornamental line-diamond-line divider centred at cx."""
+    col = COLORS["panel_border"]
+    pygame.draw.line(screen, col, (cx - half_w, y), (cx - 10, y), 1)
+    pygame.draw.line(screen, col, (cx + 10, y), (cx + half_w, y), 1)
+    pts = [(cx, y - 5), (cx + 7, y), (cx, y + 5), (cx - 7, y)]
+    pygame.draw.polygon(screen, COLORS["text_gold"], pts)
+
+
 class HUD:
     """Manages the in-game heads-up display."""
 
@@ -74,61 +92,64 @@ class HUD:
             x: X position for stats
             y: Y position for stats
         """
-        # Score with animation
+        # Background panel
+        panel_h = 115
+        _draw_panel(screen, x - 6, y - 5, 195, panel_h)
+
+        # ── Score ──
+        label_col = COLORS["text_amber"]
+        score_label = self.font_small.render("SCORE", True, label_col)
+        screen.blit(score_label, (x + 4, y + 4))
+
         score_color = COLORS["text_white"]
         if self.score_change_timer > 0:
-            # Pulse effect
             pulse = abs(self.score_change_timer % 20 - 10) / 10
             score_color = self._blend_colors(COLORS["text_white"], COLORS["text_gold"], pulse)
 
-        score_text = self.font_normal.render(f"Score: {score}", True, score_color)
-        screen.blit(score_text, (x, y))
+        score_text = self.font_normal.render(str(score), True, score_color)
+        screen.blit(score_text, (x + 4, y + 20))
 
-        # Score change popup
+        # Score popup
         if self.score_change_timer > 0:
             change_alpha = min(255, self.score_change_timer * 8)
             change_color = (
                 COLORS["text_green"] if self.score_change_amount > 0 else COLORS["text_red"]
             )
+            prefix = "+" if self.score_change_amount > 0 else ""
             change_text = self.font_small.render(
-                (
-                    f"+{self.score_change_amount}"
-                    if self.score_change_amount > 0
-                    else str(self.score_change_amount)
-                ),
-                True,
-                change_color,
+                f"{prefix}{self.score_change_amount}", True, change_color
             )
             change_text.set_alpha(change_alpha)
-            screen.blit(change_text, (x + 150, y + 5))
+            screen.blit(change_text, (x + 4 + score_text.get_width() + 8, y + 28))
 
-        # Wave
-        wave_text = self.font_normal.render(f"Wave: {wave}", True, COLORS["text_white"])
-        screen.blit(wave_text, (x, y + 40))
+        # ── Wave ──
+        wave_label = self.font_small.render("WAVE", True, label_col)
+        screen.blit(wave_label, (x + 4, y + 55))
+        wave_text = self.font_normal.render(str(wave), True, COLORS["text_white"])
+        screen.blit(wave_text, (x + 4, y + 70))
 
-        # Lives with flash effect
+        # ── Lives ──
         lives_color = COLORS["text_white"]
         if self.lives_flash_timer > 0 and self.lives_flash_timer % 10 < 5:
             lives_color = COLORS["text_red"]
 
-        lives_text = self.font_normal.render(f"Lives: {lives}", True, lives_color)
-        screen.blit(lives_text, (x, y + 80))
+        lives_label = self.font_small.render("LIVES", True, label_col)
+        screen.blit(lives_label, (x + 100, y + 55))
 
-        # Hearts visual
+        # Heart icons
         heart_icon = self.assets.get_image("heart")
         if heart_icon:
             for i in range(lives):
-                heart_x = x + 140 + i * 35  # Increased offset from 100 to 140 to avoid text overlap
-                heart_y = (
-                    y + 80
-                )  # Aligned with the Lives text baseline (same as lives_text y position)
+                hx = x + 100 + i * 28
+                hy = y + 72
                 if self.lives_flash_timer > 0:
-                    # Shake effect
                     import random
-
-                    heart_x += random.randint(-2, 2)
-                    heart_y += random.randint(-2, 2)
-                screen.blit(heart_icon, (heart_x, heart_y))
+                    hx += random.randint(-2, 2)
+                    hy += random.randint(-2, 2)
+                screen.blit(heart_icon, (hx, hy))
+        else:
+            lives_text = self.font_normal.render(str(lives), True, lives_color)
+            screen.blit(lives_text, (x + 100, y + 70))
 
     def draw_inventory(
         self,
@@ -148,42 +169,50 @@ class HUD:
             y: Y position
         """
         if x is None:
-            x = screen.get_width() - 200
+            x = screen.get_width() - 215
+
+        # Background panel for inventory
+        panel_w = 205
+        panel_h = 95
+        _draw_panel(screen, x - 8, y - 30, panel_w, panel_h)
+
+        # "DRINKS" label
+        drinks_label = self.font_small.render("— DRINKS —", True, COLORS["text_amber"])
+        lw = drinks_label.get_width()
+        screen.blit(drinks_label, (x - 8 + (panel_w - lw) // 2, y - 26))
 
         for i, drink_type in enumerate(DrinkType):
-            item_x = x + i * 60
+            item_x = x + i * 63
 
-            # Highlight selected
+            # Selection ring
             if drink_type == selected_drink:
-                pygame.draw.circle(screen, COLORS["text_gold"], (item_x, y + 20), 25, 3)
-                # Glow effect
-                glow_surf = pygame.Surface((50, 50), pygame.SRCALPHA)
-                pygame.draw.circle(glow_surf, (*COLORS["text_gold"], 30), (25, 25), 25)
-                screen.blit(glow_surf, (item_x - 25, y - 5))
+                ring_surf = pygame.Surface((54, 54), pygame.SRCALPHA)
+                pygame.draw.circle(ring_surf, (*COLORS["text_gold"], 50), (27, 27), 27)
+                screen.blit(ring_surf, (item_x - 11, y - 4))
+                pygame.draw.circle(screen, COLORS["text_gold"], (item_x + 16, y + 22), 27, 2)
 
-            # Draw icon
+            # Icon
             icon_name = f"{drink_type.name.lower()}_icon"
             icon = self.assets.get_image(icon_name)
             if icon:
-                # Scale pulse for selected
                 if drink_type == selected_drink:
-                    scale = 1.1
-                    scaled_icon = pygame.transform.scale(
+                    scale = 1.12
+                    scaled = pygame.transform.scale(
                         icon, (int(icon.get_width() * scale), int(icon.get_height() * scale))
                     )
-                    screen.blit(scaled_icon, (item_x - 18, y - 2))
+                    screen.blit(scaled, (item_x - 2, y + 5))
                 else:
-                    screen.blit(icon, (item_x - 16, y))
+                    screen.blit(icon, (item_x, y + 8))
 
             # Count
             count = inventory[drink_type]
             count_color = COLORS["text_white"] if count > 0 else COLORS["text_red"]
             count_text = self.font_small.render(str(count), True, count_color)
-            screen.blit(count_text, (item_x - 5, y + 35))
+            screen.blit(count_text, (item_x + 10, y + 40))
 
             # Hotkey hint
-            key_text = self.font_small.render(str(i + 1), True, COLORS["text_gray"])
-            screen.blit(key_text, (item_x - 5, y + 55))
+            key_text = self.font_small.render(str(i + 1), True, COLORS["text_dim"])
+            screen.blit(key_text, (item_x + 12, y + 55))
 
     def draw_wave_transition(self, screen: pygame.Surface):
         """Draw wave transition animation.
@@ -194,32 +223,48 @@ class HUD:
         if self.wave_transition_timer <= 0:
             return
 
-        # Calculate animation phase
         alpha = min(255, self.wave_transition_timer * 4)
         scale = 1.0 + (120 - self.wave_transition_timer) * 0.01
 
-        # Create text surface
-        text = self.font_large.render(self.wave_transition_text, True, COLORS["text_gold"])
+        # Dark backdrop for readability
+        backdrop = pygame.Surface((500, 140), pygame.SRCALPHA)
+        backdrop.fill((0, 0, 0, int(alpha * 0.55)))
+        cx = screen.get_width() // 2
+        cy = screen.get_height() // 3
+        bx = cx - 250
+        by = cy - 50
+        screen.blit(backdrop, (bx, by))
+        # Backdrop border
+        bd_surf = pygame.Surface((500, 140), pygame.SRCALPHA)
+        pygame.draw.rect(bd_surf, (*COLORS["text_gold"], int(alpha * 0.4)),
+                         pygame.Rect(0, 0, 500, 140), 1)
+        screen.blit(bd_surf, (bx, by))
 
-        # Scale text
-        scaled_width = int(text.get_width() * scale)
-        scaled_height = int(text.get_height() * scale)
-        scaled_text = pygame.transform.scale(text, (scaled_width, scaled_height))
+        # Wave number text
+        text = self.font_large.render(self.wave_transition_text.upper(), True, COLORS["text_gold"])
+        sw = int(text.get_width() * scale)
+        sh = int(text.get_height() * scale)
+        scaled_text = pygame.transform.scale(text, (sw, sh))
         scaled_text.set_alpha(alpha)
-
-        # Center on screen
-        text_rect = scaled_text.get_rect(center=(screen.get_width() // 2, screen.get_height() // 3))
+        text_rect = scaled_text.get_rect(center=(cx, cy))
         screen.blit(scaled_text, text_rect)
 
         # Subtitle
         if self.wave_transition_timer > 60:
-            subtitle_alpha = min(255, (self.wave_transition_timer - 60) * 8)
-            subtitle = self.font_normal.render("Get Ready!", True, COLORS["text_white"])
-            subtitle.set_alpha(subtitle_alpha)
-            subtitle_rect = subtitle.get_rect(
-                center=(screen.get_width() // 2, screen.get_height() // 3 + 60)
-            )
-            screen.blit(subtitle, subtitle_rect)
+            sub_alpha = min(255, (self.wave_transition_timer - 60) * 8)
+            subtitle = self.font_normal.render("Get Ready!", True, COLORS["text_amber"])
+            subtitle.set_alpha(sub_alpha)
+            sub_rect = subtitle.get_rect(center=(cx, cy + 55))
+            screen.blit(subtitle, sub_rect)
+
+            # Ornamental dividers
+            div_surf = pygame.Surface((300, 12), pygame.SRCALPHA)
+            div_col = (*COLORS["panel_border"], sub_alpha)
+            pygame.draw.line(div_surf, div_col, (0, 6), (130, 6), 1)
+            pygame.draw.line(div_surf, div_col, (170, 6), (300, 6), 1)
+            pygame.draw.polygon(div_surf, (*COLORS["text_gold"], sub_alpha),
+                                [(150, 0), (158, 6), (150, 12), (142, 6)])
+            screen.blit(div_surf, (cx - 150, cy + 30))
 
     def draw_restock_overlay(self, screen: pygame.Surface, timer: int, max_timer: int):
         """Draw restock overlay.
@@ -231,38 +276,45 @@ class HUD:
         """
         # Dark overlay
         overlay = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
-        overlay.fill((0, 0, 0, 150))
+        overlay.fill((0, 0, 0, 160))
         screen.blit(overlay, (0, 0))
 
+        cx = screen.get_width() // 2
+        cy = screen.get_height() // 2
+
+        # Panel
+        pw, ph = 340, 100
+        _draw_panel(screen, cx - pw // 2, cy - ph // 2, pw, ph, alpha=200)
+
         # Progress bar
-        bar_width = 300
-        bar_height = 30
-        bar_x = screen.get_width() // 2 - bar_width // 2
-        bar_y = screen.get_height() // 2 - bar_height // 2
+        bar_width = 280
+        bar_height = 24
+        bar_x = cx - bar_width // 2
+        bar_y = cy + 10
 
-        # Background
-        pygame.draw.rect(screen, COLORS["bar"], (bar_x, bar_y, bar_width, bar_height))
-
-        # Progress
         progress = 1.0 - (timer / max_timer)
-        fill_width = int(bar_width * progress)
-        pygame.draw.rect(screen, COLORS["text_gold"], (bar_x, bar_y, fill_width, bar_height))
-
+        # Track
+        pygame.draw.rect(screen, COLORS["panel_dark"], (bar_x, bar_y, bar_width, bar_height),
+                         border_radius=4)
+        # Fill
+        fill_width = max(0, int(bar_width * progress))
+        if fill_width > 0:
+            pygame.draw.rect(screen, COLORS["text_amber"],
+                             (bar_x, bar_y, fill_width, bar_height), border_radius=4)
         # Border
-        pygame.draw.rect(screen, COLORS["text_white"], (bar_x, bar_y, bar_width, bar_height), 2)
+        pygame.draw.rect(screen, COLORS["panel_border"], (bar_x, bar_y, bar_width, bar_height),
+                         2, border_radius=4)
 
-        # Text
+        # Label
         text = self.font_normal.render("RESTOCKING...", True, COLORS["text_gold"])
-        text_rect = text.get_rect(center=(screen.get_width() // 2, bar_y - 30))
+        text_rect = text.get_rect(center=(cx, cy - 18))
         screen.blit(text, text_rect)
 
         # Percentage
         percent = int(progress * 100)
-        percent_text = self.font_small.render(f"{percent}%", True, COLORS["text_white"])
-        percent_rect = percent_text.get_rect(
-            center=(screen.get_width() // 2, bar_y + bar_height + 20)
-        )
-        screen.blit(percent_text, percent_rect)
+        pct_text = self.font_small.render(f"{percent}%", True, COLORS["text_white"])
+        pct_rect = pct_text.get_rect(center=(cx, bar_y + bar_height + 14))
+        screen.blit(pct_text, pct_rect)
 
     def draw_pause_overlay(self, screen: pygame.Surface):
         """Draw pause overlay.
@@ -270,27 +322,31 @@ class HUD:
         Args:
             screen: Surface to draw on
         """
-        # Semi-transparent overlay
         overlay = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
-        overlay.fill((0, 0, 0, 100))
+        overlay.fill((0, 0, 0, 130))
         screen.blit(overlay, (0, 0))
 
-        # Pause text
+        cx = screen.get_width() // 2
+        cy = screen.get_height() // 2
+
+        # Panel
+        pw, ph = 360, 150
+        _draw_panel(screen, cx - pw // 2, cy - ph // 2, pw, ph, alpha=210)
+
+        # "PAUSED" text
         pause_text = self.font_large.render("PAUSED", True, COLORS["text_gold"])
-        pause_rect = pause_text.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2))
+        pause_rect = pause_text.get_rect(center=(cx, cy - 30))
         screen.blit(pause_text, pause_rect)
 
-        # Instructions
-        instructions = ["Press P to Resume", "Press ESC for Main Menu"]
+        # Ornamental divider
+        _draw_divider(screen, cx, cy + 5, 120)
 
-        y_offset = 60
-        for instruction in instructions:
+        # Instructions
+        instructions = ["P  ·  Resume", "ESC  ·  Main Menu"]
+        for i, instruction in enumerate(instructions):
             inst_text = self.font_small.render(instruction, True, COLORS["text_white"])
-            inst_rect = inst_text.get_rect(
-                center=(screen.get_width() // 2, screen.get_height() // 2 + y_offset)
-            )
+            inst_rect = inst_text.get_rect(center=(cx, cy + 30 + i * 28))
             screen.blit(inst_text, inst_rect)
-            y_offset += 30
 
     def _blend_colors(self, color1: tuple, color2: tuple, factor: float) -> tuple:
         """Blend two colors.
