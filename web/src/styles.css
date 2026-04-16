@@ -1,0 +1,445 @@
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  background: #2c1810;
+  color: #fff8eb;
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+  overscroll-behavior: none;
+  touch-action: none;
+}
+
+body {
+  position: fixed;
+  inset: 0;
+}
+
+.app {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(ellipse at center, #4a2a1a 0%, #2c1810 60%, #1a0d08 100%);
+}
+
+.scene {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right)
+    env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+.menu-title {
+  font-size: clamp(56px, 14vw, 140px);
+  font-weight: 900;
+  letter-spacing: 2px;
+  color: #ffd23c;
+  text-shadow:
+    0 0 20px rgba(255, 210, 60, 0.6),
+    0 4px 0 #8a5a20,
+    0 8px 24px rgba(0, 0, 0, 0.6);
+  margin: 0 0 8px;
+  animation: glow 2.4s ease-in-out infinite;
+}
+
+@keyframes glow {
+  0%,
+  100% {
+    text-shadow:
+      0 0 18px rgba(255, 210, 60, 0.45),
+      0 4px 0 #8a5a20,
+      0 8px 24px rgba(0, 0, 0, 0.6);
+  }
+  50% {
+    text-shadow:
+      0 0 32px rgba(255, 210, 60, 0.85),
+      0 4px 0 #8a5a20,
+      0 8px 24px rgba(0, 0, 0, 0.6);
+  }
+}
+
+.menu-tag {
+  color: #ffaf1e;
+  opacity: 0.85;
+  font-size: clamp(14px, 3.8vw, 22px);
+  margin: 0 0 36px;
+  text-transform: lowercase;
+  letter-spacing: 1px;
+}
+
+.btn {
+  appearance: none;
+  border: none;
+  padding: 14px 28px;
+  font-size: clamp(16px, 4.2vw, 22px);
+  font-weight: 700;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #6a3a1c 0%, #3d1f0e 100%);
+  color: #fff8eb;
+  box-shadow:
+    0 2px 0 #1a0d08,
+    0 6px 14px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 210, 60, 0.35);
+  margin: 8px;
+  min-width: 200px;
+  cursor: pointer;
+  transition: transform 0.08s ease;
+}
+
+.btn:active {
+  transform: translateY(2px);
+  box-shadow:
+    0 0 0 #1a0d08,
+    0 3px 8px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 210, 60, 0.35);
+}
+
+.btn.primary {
+  background: linear-gradient(180deg, #c8911e 0%, #8a5a10 100%);
+  color: #2c1810;
+}
+
+.btn.ghost {
+  background: transparent;
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 210, 60, 0.5),
+    0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+.game-root {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  image-rendering: pixelated;
+  touch-action: none;
+}
+
+.hud {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: calc(env(safe-area-inset-top) + 8px) calc(env(safe-area-inset-right) + 8px)
+    calc(env(safe-area-inset-bottom) + 8px) calc(env(safe-area-inset-left) + 8px);
+}
+
+.hud-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.panel {
+  background: rgba(26, 13, 8, 0.78);
+  border: 1.5px solid rgba(255, 210, 60, 0.4);
+  border-radius: 12px;
+  padding: 8px 12px;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  pointer-events: auto;
+}
+
+.stats {
+  min-width: 120px;
+}
+
+.stats .label {
+  color: #ffaf1e;
+  font-size: 11px;
+  letter-spacing: 2px;
+  font-weight: 700;
+}
+
+.stats .value {
+  color: #fff8eb;
+  font-size: 22px;
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+.stats .row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 14px;
+}
+
+.stats .hearts {
+  color: #e63c3c;
+  font-size: 18px;
+  letter-spacing: 2px;
+}
+
+.stats .hearts.flash {
+  animation: flash 0.12s linear 0s 6 alternate;
+}
+
+@keyframes flash {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.2;
+  }
+}
+
+.icon-btn {
+  appearance: none;
+  border: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(26, 13, 8, 0.78);
+  border: 1.5px solid rgba(255, 210, 60, 0.4);
+  color: #fff8eb;
+  font-size: 20px;
+  font-weight: 900;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.icon-btn:active {
+  background: rgba(255, 210, 60, 0.2);
+}
+
+.hud-bottom {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.drink-btn {
+  appearance: none;
+  border: 2px solid rgba(255, 210, 60, 0.35);
+  background: rgba(26, 13, 8, 0.82);
+  color: #fff8eb;
+  width: 72px;
+  height: 72px;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  font-weight: 800;
+  font-size: 13px;
+  pointer-events: auto;
+  cursor: pointer;
+  transition:
+    transform 0.1s ease,
+    border-color 0.1s ease;
+  position: relative;
+}
+
+.drink-btn .icon {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.drink-btn .count {
+  font-size: 12px;
+  color: #ffd23c;
+  font-weight: 900;
+}
+
+.drink-btn.selected {
+  border-color: #ffd23c;
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 0 18px rgba(255, 210, 60, 0.5);
+}
+
+.drink-btn.empty {
+  opacity: 0.4;
+}
+
+.drink-btn:active {
+  transform: translateY(2px) scale(0.98);
+}
+
+.restock-btn {
+  width: 72px;
+  height: 72px;
+  border-radius: 16px;
+  border: 2px solid rgba(255, 210, 60, 0.5);
+  background: linear-gradient(180deg, #8a5a10 0%, #4a2a1a 100%);
+  color: #fff8eb;
+  font-weight: 900;
+  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.restock-btn .icon {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.restock-btn:disabled {
+  opacity: 0.5;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(20, 10, 4, 0.75);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  pointer-events: auto;
+  gap: 14px;
+  text-align: center;
+  padding: 24px;
+}
+
+.overlay .title {
+  font-size: clamp(40px, 10vw, 88px);
+  font-weight: 900;
+  color: #ffd23c;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+  margin: 0;
+}
+
+.overlay .subtitle {
+  font-size: clamp(14px, 3.6vw, 20px);
+  color: #fff8eb;
+  opacity: 0.85;
+  margin: 0;
+}
+
+.overlay.game-over .title {
+  color: #e63c3c;
+}
+
+.progress {
+  width: min(320px, 70vw);
+  height: 14px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1.5px solid rgba(255, 210, 60, 0.4);
+  overflow: hidden;
+}
+
+.progress > div {
+  height: 100%;
+  background: linear-gradient(90deg, #c8911e, #ffd23c);
+  transition: width 0.05s linear;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, auto);
+  gap: 8px 28px;
+  margin: 8px 0 16px;
+}
+
+.stats-grid .k {
+  color: #ffaf1e;
+  font-size: 13px;
+  letter-spacing: 2px;
+  text-align: right;
+}
+
+.stats-grid .v {
+  color: #fff8eb;
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.high-scores {
+  margin: 8px 0 16px;
+  color: #fff8eb;
+}
+
+.high-scores h3 {
+  margin: 0 0 6px;
+  color: #ffaf1e;
+  font-size: 13px;
+  letter-spacing: 2px;
+}
+
+.high-scores ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 16px;
+}
+
+.high-scores li {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  opacity: 0.9;
+}
+
+.help-text {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(env(safe-area-inset-bottom) + 110px);
+  color: #fff8eb;
+  font-size: 12px;
+  letter-spacing: 1px;
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+@media (max-height: 520px) {
+  .drink-btn,
+  .restock-btn {
+    width: 60px;
+    height: 60px;
+  }
+  .drink-btn .icon,
+  .restock-btn .icon {
+    font-size: 22px;
+  }
+  .help-text {
+    bottom: calc(env(safe-area-inset-bottom) + 80px);
+  }
+}
